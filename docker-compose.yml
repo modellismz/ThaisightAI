@@ -1,0 +1,56 @@
+# ThaisightAI Docker Services
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: thaisight-postgres
+    environment:
+      POSTGRES_USER: thaisight
+      POSTGRES_PASSWORD: thaisight_dev
+      POSTGRES_DB: thaisight
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U thaisight" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: thaisight-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio
+    container_name: thaisight-minio
+    environment:
+      MINIO_ROOT_USER: thaisight
+      MINIO_ROOT_PASSWORD: thaisight_dev
+    ports:
+      - "9000:9000"
+      - "9001:9001" # Console
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

@@ -1,0 +1,129 @@
+.editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border);
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.sectionTitle {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.choiceList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.choiceItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.choiceNumber {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--gray-100);
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.deleteChoiceBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.deleteChoiceBtn:hover:not(:disabled) {
+    background: var(--gray-100);
+    color: var(--error);
+}
+
+.deleteChoiceBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.addChoiceBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.addChoiceBtn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.checkboxLabel input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: var(--space-2);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}

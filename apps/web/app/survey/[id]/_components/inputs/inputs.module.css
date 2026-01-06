@@ -1,0 +1,373 @@
+/* Shared input styles for all question types */
+
+/* Text Input & Textarea */
+.textInput,
+.textarea {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    font-size: 1rem;
+    color: var(--gray-900);
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+}
+
+.textInput:hover,
+.textarea:hover {
+    border-color: var(--gray-300);
+}
+
+.textInput:focus,
+.textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1);
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Select/Dropdown */
+.select {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    font-size: 1rem;
+    color: var(--gray-900);
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+    padding-right: 48px;
+}
+
+.select:hover {
+    border-color: var(--gray-300);
+}
+
+.select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1);
+}
+
+/* Choice List (Radio/Checkbox) */
+.choiceList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.choiceItem {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.choiceItem:hover {
+    border-color: var(--gray-300);
+    background: var(--gray-50);
+}
+
+.choiceItem:has(input:checked) {
+    border-color: var(--primary);
+    background: rgb(99 102 241 / 0.05);
+}
+
+.radio,
+.checkbox {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.choiceText {
+    flex: 1;
+    font-size: 1rem;
+    color: var(--gray-800);
+    line-height: 1.4;
+}
+
+.otherInput {
+    flex: 1;
+    margin-top: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.875rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+}
+
+/* Slider */
+.sliderContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.sliderValue {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.slider {
+    width: 100%;
+    height: 8px;
+    border-radius: var(--radius-full);
+    appearance: none;
+    cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.2);
+    transition: transform var(--transition-fast);
+}
+
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+
+.sliderLabels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+/* NPS */
+.npsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.npsScale {
+    display: flex;
+    gap: 4px;
+}
+
+.npsButton {
+    flex: 1;
+    padding: var(--space-3) 0;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--gray-600);
+    background: var(--gray-100);
+}
+
+.npsButton:hover {
+    transform: translateY(-2px);
+}
+
+.npsButton.npsDetractor:hover {
+    background: rgb(239 68 68 / 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.npsButton.npsPassive:hover {
+    background: rgb(245 158 11 / 0.1);
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+.npsButton.npsPromoter:hover {
+    background: rgb(34 197 94 / 0.1);
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+.npsButton.npsSelected.npsDetractor {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+.npsButton.npsSelected.npsPassive {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+}
+
+.npsButton.npsSelected.npsPromoter {
+    background: #22c55e;
+    border-color: #22c55e;
+    color: white;
+}
+
+.npsLabels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Matrix */
+.matrixContainer {
+    overflow-x: auto;
+}
+
+.matrixTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.matrixHeader {
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-align: center;
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.matrixRowLabel {
+    padding: var(--space-3);
+    font-size: 0.9375rem;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.matrixCell {
+    padding: var(--space-3);
+    text-align: center;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.matrixRadio {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+/* Rank Order */
+.rankContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.rankHint {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-bottom: var(--space-2);
+}
+
+.rankItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    cursor: grab;
+    transition: all var(--transition-fast);
+}
+
+.rankItem:hover {
+    border-color: var(--gray-300);
+    background: var(--gray-50);
+}
+
+.rankDragging {
+    opacity: 0.5;
+    border-style: dashed;
+}
+
+.rankNumber {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: white;
+    background: var(--primary);
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.rankText {
+    flex: 1;
+    font-size: 1rem;
+    color: var(--gray-800);
+}
+
+.rankHandle {
+    color: var(--gray-400);
+}
+
+/* Date Input */
+.dateInput {
+    padding: var(--space-3) var(--space-4);
+    font-size: 1rem;
+    color: var(--gray-900);
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+}
+
+.dateInput:hover {
+    border-color: var(--gray-300);
+}
+
+.dateInput:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1);
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+    .npsScale {
+        flex-wrap: wrap;
+    }
+
+    .npsButton {
+        min-width: 40px;
+        padding: var(--space-2);
+        font-size: 0.875rem;
+    }
+
+    .matrixContainer {
+        font-size: 0.875rem;
+    }
+
+    .matrixHeader,
+    .matrixRowLabel,
+    .matrixCell {
+        padding: var(--space-2);
+    }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@repo/api",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/shared": "*",
+    "@trpc/server": "^10.45.2",
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "pg": "^8.13.0",
+    "drizzle-orm": "^0.35.3",
+    "ioredis": "^5.4.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@types/node": "^22.15.3",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.0",
+    "drizzle-kit": "^0.26.2",
+    "typescript": "5.9.2"
+  }
+}

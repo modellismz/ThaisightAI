@@ -1,135 +1,114 @@
-# Turborepo starter
+# ThaisightAI - Advanced Agentic Survey Platform
 
-This Turborepo starter is maintained by the Turborepo core team.
+ThaisightAI is a modern, enterprise-grade survey platform designed to deliver premium user experiences and deep insights. Built with a focus on scalability, type safety, and developer experience, it enables the creation of complex, logic-driven surveys with an intuitive drag-and-drop interface.
 
-## Using this example
+## 🚀 Why We Built This
 
-Run the following command:
+Traditional survey tools often fall into two categories: simple but limited, or powerful but clunky. ThaisightAI bridges this gap by providing:
+- **Consumer-Grade UX**: A "premium" feel that engages respondents and increases completion rates.
+- **Developer-Grade Logic**: Complex branching, jumping, and carry-forward logic that powers sophisticated research.
+- **Scalability First**: Architecture designed to handle millions of responses without degradation.
 
-```sh
-npx create-turbo@latest
-```
+## ✨ Key Features
 
-## What's inside?
+### 1. Advanced Survey Builder
+- **Drag-and-Drop Canvas**: Intuitively reorder questions and blocks with smooth animations (`@dnd-kit`).
+- **Rich Question Types**: Support for Single/Multi Choice, Matrix Tables, NPS, Sliders, Ranking, Open Text, and Date/Time.
+- **Block-Based Logic**: Organize questions into logical blocks for better flow management.
+- **Real-Time Preview**: WYSIWYG editor showing exactly what respondents will see.
+- **Draft & Publish System**: Version control for surveys (Draft vs. Published/Immutable states).
 
-This Turborepo includes the following packages/apps:
+### 2. Powerful Survey Engine (`@repo/survey-engine`)
+- **Pure Functional Core**: The logic engine is separated from the UI, ensuring 100% testability and consistency.
+- **Complex Routing**: Supports "Skip Logic" (hide/show) and "Jump Logic" (skip to block) based on previous answers.
+- **State Management**: Robust session tracking for partial completions and ensuring data integrity.
 
-### Apps and Packages
+### 3. Management Dashboard
+- **Survey Listings**: Grid view of all surveys with status indicators (Draft, Published, Closed).
+- **CRUD Operations**: Complete management including deep-cloning (duplication) of complex surveys.
+- **Context Menus**: Quick access to analytics, preview, and sharing options.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### 4. Analytics & Insights
+- **Real-Time Dashboard**: See response counts and completion rates instantly.
+- **Visualizations**: Automatic bar charts for choices, NPS score calculation, and average computations.
+- **Data Export**: Full CSV export capability for external analysis.
+- **Responsiveness**: Fully responsive design for viewing analytics on mobile or desktop.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## 🛠 Tech Stack & Architecture
 
-### Utilities
+We chose a modern, type-safe stack to ensure maintainability and performance.
 
-This Turborepo has some additional tools already setup for you:
+### Monorepo Structure (Turborepo)
+- **`apps/web`**: Next.js 14+ (App Router) frontend. Handles the Builder, Runner, and Dashboard.
+- **`apps/api`**: Node.js/Express server. Handles complex business logic and database interactions.
+- **`packages/shared`**: Shared Zod schemas and TypeScript types. Ensures the frontend and backend always agree on data structures.
+- **`packages/survey-engine`**: The logic brain. A standalone package that can be used in any environment (web, mobile, server).
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+### Backend & Data
+- **node.js & Express**: For a robust, high-performance API layer.
+- **tRPC**: For end-to-end type safety between frontend and backend. No more API contract drifts.
+- **PostgreSQL**: The gold standard for relational data. Used for structured survey data and responses.
+- **Redis**: For high-speed caching and session management.
+- **Drizzle ORM**: Lightweight and type-safe SQL query builder.
 
-### Build
+### Frontend
+- **React 18 & Next.js**: For server-side rendering (SEO) and static generation performance.
+- **Zustand**: For simple, scalable client-side state management (Builder state).
+- **TanStack Query (React Query)**: For managing asynchronous server state and caching.
+- **CSS Modules**: For scoped, maintainable styling without style conflicts.
 
-To build all apps and packages, run the following command:
+## 🐳 Why Docker?
 
-```
-cd my-turborepo
+We started with Docker to ensure **reproducibility** and **scalability**.
+1.  **Dev/Prod Parity**: The environment you run locally is identical to production. No "it works on my machine" issues.
+2.  **Instant Setup**: New developers can spin up the entire stack (Postgres, Redis, MinIO, API, Web) with a single command: `docker compose up`.
+3.  **Scalability**:
+    *   **Stateless Services**: The API and Web apps are stateless containerized services.
+    *   **Horizontally Scalable**: You can easily spin up 10 instances of the API container behind a load balancer to handle high traffic.
+    *   **Microservices Ready**: The containerized architecture allows us to easily split the "Survey Runner" or "Analytics Worker" into separate services in the future if specific scaling needs arise.
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+## 🚀 Getting Started
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+### Prerequisites
+- Docker & Docker Compose
+- Node.js 18+
+- npm or pnpm
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### Running Locally
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+1.  **Start Infrastructure Services**
+    ```bash
+    docker compose up -d
+    ```
+    This starts PostgreSQL, Redis, and MinIO.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
 
-### Develop
+3.  **Initialize Database**
+    ```bash
+    # Push schema to DB
+    npm run db:push --prefix apps/api
+    ```
 
-To develop all apps and packages, run the following command:
+4.  **Start Development Servers**
+    ```bash
+    # Run both web and api in parallel
+    npm run dev
+    ```
 
-```
-cd my-turborepo
+5.  **Access the App**
+    *   Web App: `http://localhost:3000`
+    *   API: `http://localhost:4000`
+    *   Studio (DB GUI): `https://local.drizzle.studio` (if configured)
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+## 📈 Scalability Roadmap
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+1.  **Read/Write Splitting**: As read traffic (survey takers) grows, we can use Read Replicas for PostgreSQL.
+2.  **Queue-Based Processing**: For massive distinct bursts (e.g., sending 1M emails), we will introduce a message queue (RabbitMQ/Redis Streams) and separate worker containers.
+3.  **CDN & Edge**: Serve the static "Survey Runner" assets from the Edge to reduce latency for global respondents.
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+---
+© 2026 ThaisightAI. Built for scalability.

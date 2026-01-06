@@ -1,0 +1,230 @@
+.logicSection {
+    margin-top: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.toggleHeader {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: var(--gray-50);
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background var(--transition-fast);
+}
+
+.toggleHeader:hover {
+    background: var(--gray-100);
+}
+
+.toggleTitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    flex: 1;
+}
+
+.conditionCount {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: white;
+    background: var(--primary);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+.logicContent {
+    padding: var(--space-4);
+    border-top: 1px solid var(--border);
+    background: white;
+}
+
+.hint {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-bottom: var(--space-3);
+}
+
+.logicTypeSelector {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+    padding: var(--space-3);
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+}
+
+.radioLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.8125rem;
+    color: var(--gray-700);
+    cursor: pointer;
+}
+
+.radioLabel input {
+    accent-color: var(--primary);
+}
+
+.conditionsList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.conditionRow {
+    position: relative;
+}
+
+.connector {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: var(--space-2);
+    padding-left: var(--space-2);
+}
+
+.conditionFields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: var(--gray-50);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.select {
+    flex: 1;
+    min-width: 150px;
+    padding: var(--space-2);
+    font-size: 0.8125rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    background: white;
+}
+
+.selectSmall {
+    min-width: 100px;
+    padding: var(--space-2);
+    font-size: 0.8125rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    background: white;
+}
+
+.input {
+    min-width: 80px;
+    max-width: 120px;
+    padding: var(--space-2);
+    font-size: 0.8125rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+}
+
+.deleteBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--gray-400);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.deleteBtn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error);
+}
+
+.addConditionBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--gray-100);
+    border: 1px dashed var(--gray-300);
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.addConditionBtn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgb(99 102 241 / 0.05);
+}
+
+/* Skip Target Section */
+.skipTargetSection {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    padding: var(--space-3);
+    background: rgb(34 197 94 / 0.05);
+    border: 1px solid rgb(34 197 94 / 0.2);
+    border-radius: var(--radius-md);
+}
+
+.skipTargetLabel {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--success);
+    white-space: nowrap;
+}
+
+/* Carry Forward Styles */
+.carryForwardFields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.carryForwardRow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.fieldLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gray-600);
+}
+
+.carryForwardPreview {
+    padding: var(--space-3);
+    background: rgb(99 102 241 / 0.05);
+    border: 1px dashed rgb(99 102 241 / 0.3);
+    border-radius: var(--radius-md);
+}
+
+.previewLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary);
+    display: block;
+    margin-bottom: var(--space-1);
+}
+
+.previewText {
+    font-size: 0.8125rem;
+    color: var(--gray-600);
+    font-style: italic;
+}

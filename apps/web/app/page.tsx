@@ -1,101 +1,60 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
+'use client';
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
+import Link from 'next/link';
+import { Plus, FileText, BarChart2 } from 'lucide-react';
+import styles from './page.module.css';
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
-
+export default function HomePage() {
   return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
-
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.com/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <div className={styles.logo}>
+          <span className={styles.logoIcon}>📊</span>
+          <h1>ThaisightAI</h1>
         </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
+        <p className={styles.tagline}>Build intelligent surveys that deliver insights</p>
+      </header>
+
+      <main className={styles.main}>
+        <section className={styles.hero}>
+          <h2>Create your first survey</h2>
+          <p>Get started by creating a new survey or browse your existing ones.</p>
+
+          <div className={styles.actions}>
+            <Link href="/builder/new" className="btn btn-primary">
+              <Plus size={18} />
+              Create New Survey
+            </Link>
+            <Link href="/surveys" className="btn btn-secondary">
+              <FileText size={18} />
+              My Surveys
+            </Link>
+          </div>
+        </section>
+
+        <section className={styles.features}>
+          <div className={styles.featureCard}>
+            <div className={styles.featureIcon}>🎨</div>
+            <h3>Drag & Drop Builder</h3>
+            <p>Intuitive editor with 8+ question types, branching logic, and real-time preview.</p>
+          </div>
+
+          <div className={styles.featureCard}>
+            <div className={styles.featureIcon}>📱</div>
+            <h3>Multi-Channel Distribution</h3>
+            <p>Share via email, SMS, QR codes, or embed anywhere. Track opens and completions.</p>
+          </div>
+
+          <div className={styles.featureCard}>
+            <div className={styles.featureIcon}>📈</div>
+            <h3>Real-time Analytics</h3>
+            <p>Instant insights with charts, exports, and NPS tracking. No waiting for results.</p>
+          </div>
+        </section>
       </main>
+
       <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.com?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.com →
-        </a>
+        <p>© 2026 ThaisightAI. Built for scalability.</p>
       </footer>
     </div>
   );
