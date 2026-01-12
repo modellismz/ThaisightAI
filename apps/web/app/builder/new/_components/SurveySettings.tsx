@@ -99,6 +99,27 @@ export function SurveySettings() {
                     />
                 </div>
             </div>
+
+            <div className={styles.section}>
+                <h4 className={styles.sectionTitle}>Response Limits</h4>
+
+                <div className={styles.field}>
+                    <label className="label">Maximum Responses</label>
+                    <input
+                        type="number"
+                        className="input"
+                        min={0}
+                        value={settings.quotaLimit || ''}
+                        onChange={(e) => updateSettings({
+                            quotaLimit: e.target.value ? parseInt(e.target.value, 10) : undefined
+                        })}
+                        placeholder="Unlimited"
+                    />
+                    <small style={{ color: '#6b7280', marginTop: '0.25rem', display: 'block' }}>
+                        Leave empty for unlimited responses
+                    </small>
+                </div>
+            </div>
         </div>
     );
 }

@@ -8,6 +8,7 @@ import type { SurveyConfig, Block, Question, QuestionType } from '@repo/shared/s
 interface BuilderState {
     // Survey data
     surveyId: string | null;
+    surveyTitle: string;
     config: SurveyConfig;
     isDirty: boolean;
     lastSaved: Date | null;
@@ -19,6 +20,7 @@ interface BuilderState {
 
     // Actions
     setSurveyId: (id: string) => void;
+    setSurveyTitle: (title: string) => void;
     setConfig: (config: SurveyConfig) => void;
     markDirty: () => void;
     markSaved: () => void;
@@ -158,6 +160,7 @@ function createDefaultQuestion(type: QuestionType): Question {
 
 export const useBuilderStore = create<BuilderState>()((set, get) => ({
     surveyId: null,
+    surveyTitle: 'Untitled Survey',
     config: initialConfig,
     isDirty: false,
     lastSaved: null,
@@ -166,6 +169,8 @@ export const useBuilderStore = create<BuilderState>()((set, get) => ({
     isPreviewOpen: false,
 
     setSurveyId: (id) => set({ surveyId: id }),
+
+    setSurveyTitle: (title) => set({ surveyTitle: title, isDirty: true }),
 
     setConfig: (config) => set({ config, isDirty: false }),
 
@@ -307,6 +312,7 @@ export const useBuilderStore = create<BuilderState>()((set, get) => ({
     reset: () =>
         set({
             surveyId: null,
+            surveyTitle: 'Untitled Survey',
             config: initialConfig,
             isDirty: false,
             lastSaved: null,

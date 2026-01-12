@@ -12,7 +12,9 @@ import {
     calculateProgress,
     seededRandom,
     shuffleWithSeed,
+    resolveChoices,
 } from '@repo/survey-engine';
+import { getTRPCClient } from '../lib/trpc';
 
 export type RunnerStatus = 'loading' | 'in_progress' | 'submitting' | 'completed' | 'error';
 
@@ -40,7 +42,14 @@ interface RunnerState {
     progress: number;
 
     // Actions
-    initialize: (config: SurveyConfig, sessionId?: string, existingAnswers?: Record<string, unknown>) => void;
+    initialize: (data: {
+        config: SurveyConfig;
+        sessionId?: string;
+        resumeToken?: string;
+        surveyId?: string;
+        versionId?: string;
+        initialAnswers?: Record<string, unknown>;
+    }) => void;
     setAnswer: (questionId: string, value: unknown) => void;
     validateCurrentPage: () => boolean;
     goToNextBlock: () => void;
@@ -73,12 +82,15 @@ const initialState = {
 export const useRunnerStore = create<RunnerState>()((set, get) => ({
     ...initialState,
 
-    initialize: (config, sessionId, existingAnswers) => {
+    initialize: ({ config, sessionId, resumeToken, surveyId, versionId, initialAnswers }) => {
         set({
             config,
             sessionId: sessionId || crypto.randomUUID(),
+            resumeToken: resumeToken || null,
+            surveyId: surveyId || null,
+            versionId: versionId || null,
             status: 'in_progress',
-            answers: existingAnswers || {},
+            answers: initialAnswers || {},
             currentBlockIndex: 0,
             progress: 0,
             error: null,
@@ -111,6 +123,9 @@ export const useRunnerStore = create<RunnerState>()((set, get) => ({
             validationErrors: newErrors,
             progress,
         });
+
+        // Auto-save (debounce could be better, but for MVP simple save is fine)
+        saveProgress(get(), { [questionId]: value });
     },
 
     validateCurrentPage: () => {
@@ -140,6 +155,14 @@ export const useRunnerStore = create<RunnerState>()((set, get) => ({
             return;
         }
 
+        // Save progress for entire block to be safe
+        const questions = state.getVisibleQuestionsForCurrentBlock();
+        const blockAnswers: Record<string, unknown> = {};
+        questions.forEach(q => {
+            blockAnswers[q.id] = state.answers[q.id];
+        });
+        saveProgress(state, blockAnswers);
+
         const visibleBlocks = getVisibleBlocks(state.config, state.answers);
         if (state.currentBlockIndex < visibleBlocks.length - 1) {
             set({ currentBlockIndex: state.currentBlockIndex + 1 });
@@ -166,11 +189,16 @@ export const useRunnerStore = create<RunnerState>()((set, get) => ({
         set({ status: 'submitting' });
 
         try {
-            // TODO: Call API to submit
-            // await trpc.session.submit.mutate({ sessionId: state.sessionId, ... })
+            // Demo mode - just mark as completed, no backend call
+            if (!state.sessionId || state.sessionId.startsWith('demo')) {
+                set({ status: 'completed' });
+                return;
+            }
 
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const trpc = getTRPCClient();
+            await trpc.session.submit.mutate({
+                sessionId: state.sessionId,
+            });
 
             set({ status: 'completed' });
         } catch (error) {
@@ -203,6 +231,18 @@ export const useRunnerStore = create<RunnerState>()((set, get) => ({
             questions = shuffleWithSeed(questions, state.seed);
         }
 
+        // Resolve dynamic choices (Carry Forward)
+        questions = questions.map(q => {
+            if (q.carryForward && state.config) {
+                const resolved = resolveChoices(q, state.config, state.answers);
+                // Return new question object with updated choices/items/rows
+                if ('choices' in q) return { ...q, choices: resolved };
+                if ('items' in q) return { ...q, items: resolved };
+                if ('rows' in q && q.type === 'matrix') return { ...q, rows: resolved };
+            }
+            return q;
+        });
+
         return questions;
     },
 
@@ -218,3 +258,19 @@ export const useRunnerStore = create<RunnerState>()((set, get) => ({
         return state.currentBlockIndex >= visibleBlocks.length - 1;
     },
 }));
+
+// Helper to save progress
+const saveProgress = async (state: RunnerState, answersToSave: Record<string, unknown>) => {
+    // Skip for demo mode or invalid sessions
+    if (!state.sessionId || state.sessionId.startsWith('demo')) return;
+
+    try {
+        const trpc = getTRPCClient();
+        await trpc.session.saveAnswers.mutate({
+            sessionId: state.sessionId,
+            answers: answersToSave,
+        });
+    } catch (err) {
+        console.error('Failed to save progress', err);
+    }
+};

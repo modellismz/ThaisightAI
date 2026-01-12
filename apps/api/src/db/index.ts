@@ -141,10 +141,19 @@ const surveyDrafts = {
 const surveyVersions = {
     async getById(id: string) {
         const result = await pool.query(
-            'SELECT * FROM survey_versions WHERE id = $1',
+            'SELECT id, survey_id, version_number, compiled_graph, config_url, published_at FROM survey_versions WHERE id = $1',
             [id]
         );
-        return result.rows[0] as SurveyVersion | undefined;
+        if (result.rows.length === 0) return undefined;
+        const row = result.rows[0];
+        return {
+            id: row.id,
+            surveyId: row.survey_id,
+            versionNumber: row.version_number,
+            compiledGraph: row.compiled_graph,
+            configUrl: row.config_url,
+            publishedAt: row.published_at,
+        } as SurveyVersion;
     },
 
     async getLatest(surveyId: string) {
@@ -193,13 +202,31 @@ const surveyVersions = {
 // Sessions
 // ============================================
 
+// Helper to map snake_case PostgreSQL row to camelCase Session type
+function mapSessionRow(row: Record<string, unknown>): Session {
+    return {
+        id: row.id as string,
+        surveyId: row.survey_id as string,
+        versionId: row.version_id as string,
+        resumeToken: row.resume_token as string | null,
+        status: row.status as Session['status'],
+        respondentId: row.respondent_id as string | null,
+        metadata: row.metadata as Record<string, unknown>,
+        ipHash: row.ip_hash as string | null,
+        userAgent: row.user_agent as string | null,
+        startedAt: row.started_at as Date,
+        lastActivityAt: row.last_activity_at as Date,
+        completedAt: row.completed_at as Date | null,
+    };
+}
+
 const sessions = {
     async getById(id: string) {
         const result = await pool.query(
             'SELECT * FROM sessions WHERE id = $1',
             [id]
         );
-        return result.rows[0] as Session | undefined;
+        return result.rows[0] ? mapSessionRow(result.rows[0]) : undefined;
     },
 
     async getByResumeToken(token: string) {
@@ -207,7 +234,7 @@ const sessions = {
             'SELECT * FROM sessions WHERE resume_token = $1',
             [token]
         );
-        return result.rows[0] as Session | undefined;
+        return result.rows[0] ? mapSessionRow(result.rows[0]) : undefined;
     },
 
     async create(data: {
@@ -224,7 +251,7 @@ const sessions = {
        RETURNING *`,
             [data.surveyId, data.versionId, data.resumeToken, JSON.stringify(data.metadata), data.ipHash, data.userAgent]
         );
-        return result.rows[0] as Session;
+        return mapSessionRow(result.rows[0]);
     },
 
     async updateActivity(id: string) {
@@ -249,10 +276,16 @@ const sessions = {
 const responseEvents = {
     async getBySessionId(sessionId: string) {
         const result = await pool.query(
-            'SELECT * FROM response_events WHERE session_id = $1 ORDER BY recorded_at ASC',
+            'SELECT id, session_id, question_id, value, recorded_at FROM response_events WHERE session_id = $1 ORDER BY recorded_at ASC',
             [sessionId]
         );
-        return result.rows as ResponseEvent[];
+        return result.rows.map(row => ({
+            id: row.id,
+            sessionId: row.session_id,
+            questionId: row.question_id,
+            value: row.value,
+            recordedAt: row.recorded_at,
+        })) as ResponseEvent[];
     },
 
     async createMany(events: { sessionId: string; questionId: string; value: unknown }[]) {
@@ -304,6 +337,14 @@ const responses = {
             [surveyId, limit, offset]
         );
         return result.rows as SurveyResponse[];
+    },
+
+    async countBySurveyId(surveyId: string): Promise<number> {
+        const result = await pool.query(
+            'SELECT COUNT(*) as count FROM responses WHERE survey_id = $1',
+            [surveyId]
+        );
+        return parseInt(result.rows[0].count, 10);
     },
 };
 

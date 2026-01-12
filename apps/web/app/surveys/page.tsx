@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { ShareModal } from './_components/ShareModal';
 import Link from 'next/link';
-import { Plus, FileText, MoreVertical, Eye, Edit2, Trash2, Copy, BarChart2, Loader2 } from 'lucide-react';
+import { Plus, FileText, MoreVertical, Eye, Edit2, Trash2, Copy, BarChart2, Loader2, QrCode } from 'lucide-react';
 import styles from './surveys.module.css';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -21,6 +22,7 @@ export default function SurveysPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [activeShareSurvey, setActiveShareSurvey] = useState<Survey | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
     // Click outside to close menu
@@ -199,6 +201,16 @@ export default function SurveysPage() {
                                                     <FileText size={14} />
                                                     Duplicate
                                                 </button>
+                                                <button
+                                                    className={styles.dropdownItem}
+                                                    onClick={() => {
+                                                        setOpenMenuId(null);
+                                                        setActiveShareSurvey(survey);
+                                                    }}
+                                                >
+                                                    <QrCode size={14} />
+                                                    QR Code
+                                                </button>
                                                 <Link href={`/surveys/${survey.id}/analytics`} className={styles.dropdownItem}>
                                                     <BarChart2 size={14} />
                                                     Analytics
@@ -241,6 +253,16 @@ export default function SurveysPage() {
                     </div>
                 )}
             </main>
+
+            {/* Share Modal */}
+            {activeShareSurvey && (
+                <ShareModal
+                    isOpen={true}
+                    onClose={() => setActiveShareSurvey(null)}
+                    surveyId={activeShareSurvey.id}
+                    surveyTitle={activeShareSurvey.title}
+                />
+            )}
         </div>
     );
 }

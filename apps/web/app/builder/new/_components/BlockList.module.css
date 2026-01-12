@@ -150,9 +150,48 @@
 }
 
 .questionItem.questionSelected {
-  background: rgb(99 102 241 / 0.03);
+  background: var(--gray-800);
   border-color: var(--primary);
   box-shadow: 0 0 0 2px rgb(99 102 241 / 0.1);
+}
+
+.questionItem.questionSelected .questionText {
+  color: white;
+}
+
+.questionItem.questionSelected .questionType {
+  color: rgb(165 180 252);
+}
+
+.questionItem.questionSelected .choiceText,
+.questionItem.questionSelected .matrixRowLabel,
+.questionItem.questionSelected .matrixCol,
+.questionItem.questionSelected .sliderLabels,
+.questionItem.questionSelected .sliderRange,
+.questionItem.questionSelected .rankText,
+.questionItem.questionSelected .datePlaceholder {
+  color: var(--gray-300);
+}
+
+.questionItem.questionSelected .previewSection {
+  background: var(--gray-900);
+  border-color: var(--gray-700);
+}
+
+.questionItem.questionSelected .choiceBullet,
+.questionItem.questionSelected .matrixDot {
+  color: var(--gray-500);
+}
+
+.questionItem.questionSelected .rankItem,
+.questionItem.questionSelected .dateInput {
+  background: var(--gray-700);
+  border-color: var(--gray-600);
+}
+
+.questionItem.questionSelected .logicIndicators {
+  background: var(--gray-700);
+  border-color: var(--gray-600);
 }
 
 /* Logic Indicators Sidebar */
@@ -512,35 +551,4 @@
   color: var(--gray-500);
 }
 
-/* Dark mode overrides */
-@media (prefers-color-scheme: dark) {
-  .questionItem {
-    background: var(--gray-800);
-    border-color: var(--gray-700);
-  }
-
-  .questionItem:hover {
-    border-color: var(--gray-600);
-  }
-
-  .questionText {
-    color: white;
-  }
-
-  .previewSection {
-    background: var(--gray-900);
-    border-color: var(--gray-700);
-  }
-
-  .choiceText,
-  .matrixRowLabel,
-  .rankText {
-    color: var(--gray-300);
-  }
-
-  .rankItem,
-  .dateInput {
-    background: var(--gray-800);
-    border-color: var(--gray-600);
-  }
-}
+/* Light theme only - no dark mode */

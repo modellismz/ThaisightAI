@@ -16,7 +16,7 @@ interface AutosaveOptions {
 
 export function useAutosave(options: AutosaveOptions = {}) {
     const { enabled = true, onSaveStart, onSaveSuccess, onSaveError } = options;
-    const { config, isDirty, surveyId, markSaved, setSurveyId } = useBuilderStore();
+    const { config, isDirty, surveyId, surveyTitle, markSaved, setSurveyId } = useBuilderStore();
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const isSavingRef = useRef(false);
 
@@ -24,6 +24,7 @@ export function useAutosave(options: AutosaveOptions = {}) {
         try {
             const draft = {
                 surveyId,
+                surveyTitle,
                 config,
                 savedAt: new Date().toISOString(),
             };
@@ -33,7 +34,7 @@ export function useAutosave(options: AutosaveOptions = {}) {
             console.error('Failed to save to localStorage:', error);
             return false;
         }
-    }, [config, surveyId]);
+    }, [config, surveyId, surveyTitle]);
 
     const saveToServer = useCallback(async () => {
         if (isSavingRef.current) return;
@@ -51,7 +52,7 @@ export function useAutosave(options: AutosaveOptions = {}) {
             if (!currentSurveyId) {
                 try {
                     const newSurvey = await createSurvey({
-                        title: 'Untitled Survey',
+                        title: surveyTitle || 'Untitled Survey',
                         description: '',
                     });
                     currentSurveyId = newSurvey.id;
@@ -82,7 +83,7 @@ export function useAutosave(options: AutosaveOptions = {}) {
         } finally {
             isSavingRef.current = false;
         }
-    }, [config, surveyId, markSaved, setSurveyId, saveToLocalStorage, onSaveStart, onSaveSuccess, onSaveError]);
+    }, [config, surveyId, surveyTitle, markSaved, setSurveyId, saveToLocalStorage, onSaveStart, onSaveSuccess, onSaveError]);
 
     // Debounced autosave
     useEffect(() => {
@@ -129,7 +130,7 @@ export function useAutosave(options: AutosaveOptions = {}) {
     };
 }
 
-export function loadDraftFromLocalStorage(): { surveyId: string | null; config: any; savedAt: string } | null {
+export function loadDraftFromLocalStorage(): { surveyId: string | null; surveyTitle?: string; config: any; savedAt: string } | null {
     try {
         const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (!stored) return null;

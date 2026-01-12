@@ -44,7 +44,7 @@ export function CarryForwardEditor({ question, blockId }: CarryForwardEditorProp
 
     const carryForward = question.carryForward || {
         sourceQuestionId: '',
-        carryType: 'selected', // 'selected', 'not_selected', 'all'
+        logicType: 'selected', // 'selected', 'not_selected', 'all'
     };
 
     const updateCarryForward = (updates: Partial<typeof carryForward>) => {
@@ -97,8 +97,8 @@ export function CarryForwardEditor({ question, blockId }: CarryForwardEditorProp
                                 <label className={styles.fieldLabel}>Carry:</label>
                                 <select
                                     className={styles.select}
-                                    value={carryForward.carryType}
-                                    onChange={(e) => updateCarryForward({ carryType: e.target.value })}
+                                    value={carryForward.logicType}
+                                    onChange={(e) => updateCarryForward({ logicType: e.target.value })}
                                 >
                                     <option value="selected">Selected choices only</option>
                                     <option value="not_selected">Not selected choices only</option>

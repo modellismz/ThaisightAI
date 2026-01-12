@@ -27,6 +27,17 @@ export const sessionRouter = router({
                     throw new Error('No published version available');
                 }
                 versionId = latestVersion.id;
+
+                // Check quota limit from the compiled config
+                const config = latestVersion.compiledGraph as { settings?: { quotaLimit?: number } } | null;
+                const quotaLimit = config?.settings?.quotaLimit;
+
+                if (quotaLimit && quotaLimit > 0) {
+                    const responseCount = await db.responses.countBySurveyId(input.surveyId);
+                    if (responseCount >= quotaLimit) {
+                        throw new Error('QUOTA_FULL');
+                    }
+                }
             }
 
             // Generate resume token

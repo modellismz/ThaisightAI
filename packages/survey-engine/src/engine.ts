@@ -163,6 +163,66 @@ export function getVisibleBlocks(
     );
 }
 
+/**
+ * Resolve dynamic choies for a question (Carry Forward logic)
+ */
+export function resolveChoices(
+    question: Question,
+    config: SurveyConfig,
+    answers: Record<string, unknown>
+): any[] { // Returns Choice[] or Matrix Row[] etc.
+    // 1. If no carry forward, return static choices/items
+    if (!question.carryForward) {
+        if ('choices' in question) return (question as any).choices;
+        if ('items' in question) return (question as any).items;
+        if ('rows' in question) return (question as any).rows;
+        return [];
+    }
+
+    const { sourceQuestionId, logicType } = question.carryForward;
+
+    // 2. Find source question
+    let sourceQuestion: Question | undefined;
+    for (const block of config.blocks) {
+        const found = block.questions.find(q => q.id === sourceQuestionId);
+        if (found) {
+            sourceQuestion = found;
+            break;
+        }
+    }
+
+    if (!sourceQuestion) return [];
+
+    // 3. Get source choices
+    let sourceChoices: any[] = [];
+    if ('choices' in sourceQuestion) sourceChoices = (sourceQuestion as any).choices;
+    else if ('items' in sourceQuestion) sourceChoices = (sourceQuestion as any).items;
+    else if ('rows' in sourceQuestion) sourceChoices = (sourceQuestion as any).rows;
+
+    // 4. Get source answer
+    const sourceAnswer = answers[sourceQuestionId];
+
+    // 5. Filter based on logic type
+    return sourceChoices.filter(choice => {
+        const isSelected = Array.isArray(sourceAnswer)
+            ? sourceAnswer.includes(choice.id) || sourceAnswer.includes(choice.text) // Check ID or Text match
+            : sourceAnswer === choice.id || sourceAnswer === choice.text;
+
+        switch (logicType) {
+            case 'selected':
+                return isSelected;
+            case 'not_selected':
+                return !isSelected && sourceAnswer !== undefined; // Only show not selected if question was answered
+            case 'all':
+            case 'displayed': // Assuming displayed = all for now since choices don't have visibility logic yet
+            case 'not_displayed': // Not supported yet
+                return true;
+            default:
+                return true;
+        }
+    });
+}
+
 // ============================================
 // Randomization (Seeded)
 // ============================================

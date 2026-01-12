@@ -1,18 +1,24 @@
 /**
  * tRPC Client Configuration
- * Simplified version that works without the API type import
  */
 import { createTRPCReact } from '@trpc/react-query';
-import { httpBatchLink } from '@trpc/client';
-
-// Define a placeholder type - will be replaced with proper type from API
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AppRouter = any;
+import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
+import type { AppRouter } from '@repo/api/src/trpc/router';
 
 export const trpc = createTRPCReact<AppRouter>();
 
-export function getTRPCClient() {
+export function getReactTRPCClient() {
     return trpc.createClient({
+        links: [
+            httpBatchLink({
+                url: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/trpc',
+            }),
+        ],
+    });
+}
+
+export function getTRPCClient() {
+    return createTRPCProxyClient<AppRouter>({
         links: [
             httpBatchLink({
                 url: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/trpc',

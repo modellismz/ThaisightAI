@@ -93,6 +93,13 @@ export type DisplayLogic = z.infer<typeof DisplayLogicSchema>;
 // Question Schemas
 // ============================================
 
+export const CarryForwardRuleSchema = z.object({
+    sourceQuestionId: z.string(),
+    logicType: z.enum(['selected', 'not_selected', 'displayed', 'not_displayed', 'all']),
+});
+
+export type CarryForwardRule = z.infer<typeof CarryForwardRuleSchema>;
+
 const BaseQuestionSchema = z.object({
     id: z.string(),
     type: QuestionTypeSchema,
@@ -101,6 +108,7 @@ const BaseQuestionSchema = z.object({
     helpText: z.string().optional(),
     validation: ValidationRuleSchema.optional(),
     displayLogic: DisplayLogicSchema.optional(),
+    carryForward: CarryForwardRuleSchema.optional(),
 });
 
 // Text Question

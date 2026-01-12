@@ -2,150 +2,155 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+    background-color: #f3f4f6;
     overflow: hidden;
 }
 
 .header {
+    height: 60px;
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-3) var(--space-4);
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
     flex-shrink: 0;
+    z-index: 10;
 }
 
 .headerLeft {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: 16px;
+    flex: 1;
+}
+
+.headerMid {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    justify-content: flex-end;
 }
 
 .backButton {
+    color: #6b7280;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    transition: all var(--transition-fast);
 }
 
 .backButton:hover {
-    background: var(--gray-100);
-    color: var(--text-primary);
+    background-color: #f3f4f6;
+    color: #111827;
 }
 
 .titleInput {
-    font-size: 1.125rem;
+    font-size: 16px;
     font-weight: 600;
+    color: #111827;
     border: none;
-    background: transparent;
-    color: var(--text-primary);
     outline: none;
-    min-width: 200px;
+    background: transparent;
+    width: 300px;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
 }
 
-.titleInput::placeholder {
-    color: var(--text-muted);
+.titleInput:hover,
+.titleInput:focus {
+    background: #f9fafb;
 }
 
 .saveStatus {
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 0.75rem;
-    color: var(--text-muted);
+    gap: 6px;
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 2px;
 }
 
 .saveStatus.saved {
-    color: var(--success);
+    color: #10b981;
 }
 
 .saveStatus.error {
-    color: var(--error);
+    color: #ef4444;
 }
 
 .spinIcon {
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.restorePrompt {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-3);
-    padding: var(--space-2) var(--space-4);
-    background: rgb(99 102 241 / 0.1);
-    border-bottom: 1px solid rgb(99 102 241 / 0.2);
-    font-size: 0.875rem;
-    color: var(--gray-700);
-}
-
-.headerActions {
-    display: flex;
-    gap: var(--space-2);
-}
-
 .main {
-    display: grid;
-    grid-template-columns: 220px 1fr 320px;
+    display: flex;
     flex: 1;
     overflow: hidden;
+    position: relative;
 }
 
-/* Left Sidebar */
+.flowContainer {
+    flex: 1;
+    height: 100%;
+    position: relative;
+}
+
 .sidebar {
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    padding: var(--space-4);
+    width: 260px;
+    background-color: white;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
     overflow-y: auto;
 }
 
 .sidebarTitle {
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    margin-bottom: var(--space-3);
+    color: #6b7280;
+    padding: 20px 20px 10px;
+    margin: 0;
 }
 
 .questionTypes {
+    padding: 0 12px;
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: 4px;
 }
 
 .questionTypeBtn {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    background: transparent;
+    gap: 12px;
+    padding: 10px 12px;
+    background: white;
     border: 1px solid transparent;
-    border-radius: var(--radius-md);
-    font-size: 0.875rem;
-    color: var(--text-primary);
+    border-radius: 6px;
+    color: #374151;
+    font-size: 14px;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s;
     text-align: left;
+    width: 100%;
 }
 
 .questionTypeBtn:hover:not(:disabled) {
-    background: var(--gray-100);
-    border-color: var(--border);
+    background-color: #f3f4f6;
+    border-color: #e5e7eb;
 }
 
 .questionTypeBtn:disabled {
@@ -154,74 +159,79 @@
 }
 
 .questionTypeIcon {
-    font-size: 1.125rem;
+    font-size: 18px;
 }
 
-/* Canvas */
 .canvas {
-    background: var(--gray-50);
+    flex: 1;
     overflow-y: auto;
-    padding: var(--space-6);
+    padding: 40px;
+    background-color: #f3f4f6;
+    display: flex;
+    justify-content: center;
 }
 
 .canvasContent {
-    max-width: 720px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 100px;
 }
 
 .emptyState {
     text-align: center;
-    padding: var(--space-12);
-    background: var(--surface);
-    border: 2px dashed var(--border);
-    border-radius: var(--radius-xl);
+    padding: 60px 20px;
+    background: white;
+    border-radius: 12px;
+    border: 1px dashed #e5e7eb;
 }
 
 .emptyIcon {
-    font-size: 3rem;
-    margin-bottom: var(--space-4);
+    font-size: 48px;
+    margin-bottom: 16px;
 }
 
 .emptyState h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: var(--space-2);
-    color: var(--text-primary);
+    margin: 0 0 8px;
+    color: #111827;
 }
 
 .emptyState p {
-    color: var(--text-secondary);
-    margin-bottom: var(--space-6);
+    color: #6b7280;
+    margin: 0 0 24px;
 }
 
 .addBlockButton {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
-    width: 100%;
-    padding: var(--space-4);
-    margin-top: var(--space-4);
-    background: transparent;
-    border: 2px dashed var(--border);
-    border-radius: var(--radius-lg);
-    color: var(--text-muted);
-    font-size: 0.875rem;
+    gap: 8px;
+    padding: 16px;
+    background-color: transparent;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    color: #6b7280;
+    font-weight: 500;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s;
+    width: 100%;
 }
 
 .addBlockButton:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: rgb(99 102 241 / 0.05);
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background-color: #eff6ff;
 }
 
-/* Right Editor Panel */
 .editorPanel {
-    background: var(--surface);
-    border-left: 1px solid var(--border);
-    padding: var(--space-4);
+    width: 320px;
+    background-color: white;
+    border-left: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
     overflow-y: auto;
 }
 
@@ -231,37 +241,67 @@
     align-items: center;
     justify-content: center;
     height: 100%;
+    padding: 40px;
     text-align: center;
-    color: var(--text-muted);
+    color: #9ca3af;
 }
 
 .editorEmptyIcon {
-    margin-bottom: var(--space-4);
-    opacity: 0.3;
+    margin-bottom: 16px;
+    opacity: 0.5;
 }
 
-.editorEmpty p {
-    font-size: 0.875rem;
+/* View Toggle */
+.viewToggle {
+    display: flex;
+    background: #f3f4f6;
+    padding: 4px;
+    border-radius: 8px;
+    gap: 4px;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-    .main {
-        grid-template-columns: 180px 1fr;
+.toggleBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toggleBtn:hover {
+    color: #111827;
+}
+
+.toggleBtn.active {
+    background: white;
+    color: #3b82f6;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.restorePrompt {
+    background-color: #fffbeb;
+    border-bottom: 1px solid #fcd34d;
+    color: #92400e;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
     }
 
-    .editorPanel {
-        position: fixed;
-        right: 0;
-        top: 60px;
-        bottom: 0;
-        width: 320px;
-        transform: translateX(100%);
-        transition: transform var(--transition-normal);
-        z-index: 100;
-    }
-
-    .editorPanel.open {
-        transform: translateX(0);
+    to {
+        transform: rotate(360deg);
     }
 }
