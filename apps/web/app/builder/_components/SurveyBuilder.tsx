@@ -9,6 +9,10 @@ import { QuestionEditor } from '../new/_components/QuestionEditor';
 import { SurveySettings } from '../new/_components/SurveySettings';
 import { FlowEditor } from './FlowEditor/FlowEditor';
 import styles from '../new/builder.module.css';
+import { useUser } from '../../context/UserContext';
+import Image from 'next/image';
+import { LogOut } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 
 interface SurveyBuilderProps {
     saveStatus: 'idle' | 'saving' | 'saved' | 'error';
@@ -186,6 +190,10 @@ export function SurveyBuilder({
                             <QuestionTypeButton type="rank_order" label="Rank Order" icon="🔢" />
                             <QuestionTypeButton type="date" label="Date" icon="📅" />
                         </div>
+                        
+                        <div className={styles.sidebarFooter}>
+                            <SidebarUserProfile />
+                        </div>
                     </aside>
 
                     {/* Center - Survey Canvas */}
@@ -271,4 +279,39 @@ function formatTimeAgo(date: Date): string {
     if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
     return `${hours}h ago`;
+}
+
+function SidebarUserProfile() {
+    const user = useUser();
+    
+    if (!user) return null;
+
+    return (
+        <div className={styles.userProfileShort}>
+            {user.image ? (
+                <Image 
+                    src={user.image} 
+                    alt={user.name || 'User'} 
+                    width={32} 
+                    height={32} 
+                    className={styles.userAvatar}
+                />
+            ) : (
+                <div className={styles.userAvatar} style={{ background: '#9ca3af' }} />
+            )}
+            
+            <div className={styles.userInfo}>
+                <span className={styles.userName}>{user.name}</span>
+                <span className={styles.userRole}>Admin</span>
+            </div>
+
+            <button 
+                className={styles.logoutBtnShort}
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                title="Sign Out"
+            >
+                <LogOut size={16} />
+            </button>
+        </div>
+    );
 }

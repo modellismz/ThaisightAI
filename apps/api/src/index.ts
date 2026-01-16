@@ -13,8 +13,18 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Middleware
+// Middleware
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: (origin, callback) => {
+        const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000').split(',');
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://192.168.')) {
+            callback(null, true);
+        } else {
+            callback(null, false); // Fail silently or with error? strictly speaking we should fail, but for dev maybe strict is annoying.
+        }
+    },
     credentials: true,
 }));
 app.use(express.json());

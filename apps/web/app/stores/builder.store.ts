@@ -4,6 +4,7 @@
  */
 import { create } from 'zustand';
 import type { SurveyConfig, Block, Question, QuestionType } from '@repo/shared/schemas';
+import { v4 as uuidv4 } from 'uuid';
 
 interface BuilderState {
     // Survey data
@@ -67,7 +68,7 @@ const initialConfig: SurveyConfig = {
 };
 
 function generateId(): string {
-    return crypto.randomUUID();
+    return uuidv4();
 }
 
 function createDefaultQuestion(type: QuestionType): Question {
@@ -226,7 +227,9 @@ export const useBuilderStore = create<BuilderState>()((set, get) => ({
         const state = get();
         const blocks = [...state.config.blocks];
         const [removed] = blocks.splice(startIndex, 1);
-        blocks.splice(endIndex, 0, removed);
+        if (removed) {
+            blocks.splice(endIndex, 0, removed);
+        }
         set({
             config: { ...state.config, blocks },
             isDirty: true,
@@ -260,7 +263,7 @@ export const useBuilderStore = create<BuilderState>()((set, get) => ({
                         ? {
                             ...block,
                             questions: block.questions.map((q) =>
-                                q.id === questionId ? { ...q, ...updates } : q
+                                q.id === questionId ? { ...q, ...updates } as Question : q
                             ),
                         }
                         : block
@@ -295,7 +298,9 @@ export const useBuilderStore = create<BuilderState>()((set, get) => ({
                     if (block.id !== blockId) return block;
                     const questions = [...block.questions];
                     const [removed] = questions.splice(startIndex, 1);
-                    questions.splice(endIndex, 0, removed);
+                    if (removed) {
+                        questions.splice(endIndex, 0, removed);
+                    }
                     return { ...block, questions };
                 }),
             },

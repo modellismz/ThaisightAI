@@ -59,6 +59,8 @@ export function useAutosave(options: AutosaveOptions = {}) {
                     setSurveyId(newSurvey.id);
                 } catch (error) {
                     console.warn('Failed to create survey on server, saving locally only:', error);
+                    if (error instanceof Error) alert(`Failed to create survey: ${error.message}`);
+
                     // Still mark as saved for local storage
                     markSaved();
                     onSaveSuccess?.();
@@ -73,7 +75,13 @@ export function useAutosave(options: AutosaveOptions = {}) {
                 markSaved();
                 onSaveSuccess?.();
             } catch (error) {
-                console.warn('Failed to save to server, saved locally:', error);
+                console.error('Failed to save to server:', error);
+
+                // Show visual feedback for error
+                if (error instanceof Error) {
+                    alert(`Failed to save draft: ${error.message}`);
+                }
+
                 // Still mark as saved since we saved to localStorage
                 markSaved();
                 onSaveSuccess?.();

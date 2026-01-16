@@ -3,8 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { ShareModal } from './_components/ShareModal';
 import Link from 'next/link';
-import { Plus, FileText, MoreVertical, Eye, Edit2, Trash2, Copy, BarChart2, Loader2, QrCode } from 'lucide-react';
+import { Plus, FileText, MoreVertical, Eye, Edit2, Trash2, Copy, BarChart2, Loader2, QrCode, LogOut } from 'lucide-react';
 import styles from './surveys.module.css';
+import { useUser } from '../context/UserContext';
+import { signOut } from 'next-auth/react';
+import Image from 'next/image';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -131,10 +134,13 @@ export default function SurveysPage() {
                             {surveys.length} survey{surveys.length !== 1 ? 's' : ''}
                         </p>
                     </div>
-                    <Link href="/builder/new" className={styles.createBtn}>
-                        <Plus size={18} />
-                        Create Survey
-                    </Link>
+                    <div className={styles.headerActions}>
+                        <Link href="/builder/new" className={styles.createBtn}>
+                            <Plus size={18} />
+                            Create Survey
+                        </Link>
+                        <UserProfileDropdown />
+                    </div>
                 </div>
             </header>
 
@@ -262,6 +268,62 @@ export default function SurveysPage() {
                     surveyId={activeShareSurvey.id}
                     surveyTitle={activeShareSurvey.title}
                 />
+            )}
+        </div>
+    );
+}
+
+function UserProfileDropdown() {
+    const user = useUser();
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    if (!user) return null;
+
+    return (
+        <div className={styles.userProfileWrapper} ref={dropdownRef}>
+            <button 
+                className={styles.userProfileBtn} 
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                {user.image ? (
+                    <Image 
+                        src={user.image} 
+                        alt={user.name || 'User'} 
+                        width={32} 
+                        height={32} 
+                        className={styles.userAvatar}
+                    />
+                ) : (
+                    <div className={styles.userAvatar} style={{ background: '#9ca3af' }} />
+                )}
+            </button>
+
+            {isOpen && (
+                <div className={styles.userDropdown}>
+                    <div className={styles.userInfo}>
+                        <span className={styles.userName}>{user.name}</span>
+                        <span className={styles.userEmail}>{user.email}</span>
+                    </div>
+                    <hr className={styles.dropdownDivider} />
+                    <button 
+                        className={styles.userDropdownItem}
+                        onClick={() => signOut({ callbackUrl: '/login' })}
+                    >
+                        <LogOut size={14} />
+                        Sign Out
+                    </button>
+                </div>
             )}
         </div>
     );

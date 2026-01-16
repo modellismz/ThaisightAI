@@ -189,8 +189,8 @@ export const useRunnerStore = create<RunnerState>()((set, get) => ({
         set({ status: 'submitting' });
 
         try {
-            // Demo mode - just mark as completed, no backend call
-            if (!state.sessionId || state.sessionId.startsWith('demo')) {
+            // Demo/Preview mode - just mark as completed, no backend call
+            if (!state.sessionId || state.sessionId.startsWith('demo') || state.sessionId.startsWith('preview')) {
                 set({ status: 'completed' });
                 return;
             }
@@ -261,8 +261,8 @@ export const useRunnerStore = create<RunnerState>()((set, get) => ({
 
 // Helper to save progress
 const saveProgress = async (state: RunnerState, answersToSave: Record<string, unknown>) => {
-    // Skip for demo mode or invalid sessions
-    if (!state.sessionId || state.sessionId.startsWith('demo')) return;
+    // Skip for demo mode, preview mode, or invalid sessions
+    if (!state.sessionId || state.sessionId.startsWith('demo') || state.sessionId.startsWith('preview')) return;
 
     try {
         const trpc = getTRPCClient();

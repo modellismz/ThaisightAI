@@ -348,9 +348,24 @@ const responses = {
     },
 };
 
+// ============================================
+// Users
+// ============================================
+
+const users = {
+    async getByEmail(email: string) {
+        const result = await pool.query(
+            'SELECT * FROM users WHERE email = $1',
+            [email]
+        );
+        return result.rows[0] as { id: string; email: string; role: string } | undefined;
+    },
+};
+
 // Export database interface
 export const db = {
     pool,
+    users,
     surveys,
     surveyDrafts,
     surveyVersions,
