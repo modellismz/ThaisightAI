@@ -229,6 +229,61 @@ app.get('/api/surveys/:id/responses', async (req, res) => {
     }
 });
 
+// Get aggregated dashboard data
+app.get('/api/analytics/dashboard', async (_req, res) => {
+    try {
+        const totalSurveys = await db.surveys.countTotal();
+        const activeSurveys = await db.surveys.countTotal('published');
+        const totalResponses = await db.responses.countTotal();
+
+        const surveysWithStats = await db.surveys.getDashboardStats();
+        const dailyTrends = await db.responses.getDailyTrends(7);
+        const recentActivity = await db.responses.getRecentActivity(10);
+
+        // Calculate trends or complex metrics here if needed
+        // For now, return the list with enriched stats
+
+        res.json({
+            globalStats: {
+                totalSurveys,
+                activeSurveys,
+                totalResponses
+            },
+            dailyTrends,
+            recentActivity,
+            surveys: surveysWithStats
+        });
+    } catch (error) {
+        console.error('Error getting dashboard analytics:', error);
+        res.status(500).json({ error: 'Failed to get dashboard analytics' });
+    }
+});
+
+// Get simple global analytics summary (deprecated or lightweight version)
+app.get('/api/analytics/summary', async (_req, res) => {
+    try {
+        const totalSurveys = await db.surveys.countTotal();
+        const activeSurveys = await db.surveys.countTotal('published');
+        const totalResponses = await db.responses.countTotal();
+
+        // Calculate average response rate (simple mock logic or real if data allows)
+        // For now, simple average responses per survey
+        const avgResponsesPerSurvey = totalSurveys > 0
+            ? Math.round(totalResponses / totalSurveys)
+            : 0;
+
+        res.json({
+            totalSurveys,
+            activeSurveys,
+            totalResponses,
+            avgResponsesPerSurvey
+        });
+    } catch (error) {
+        console.error('Error getting global analytics:', error);
+        res.status(500).json({ error: 'Failed to get global analytics' });
+    }
+});
+
 // Get survey analytics summary
 app.get('/api/surveys/:id/analytics', async (req, res) => {
     try {

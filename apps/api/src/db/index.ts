@@ -47,6 +47,19 @@ const surveys = {
         return result.rows as Survey[];
     },
 
+    async countTotal(status?: string): Promise<number> {
+        let query = 'SELECT COUNT(*) as count FROM surveys';
+        const values: unknown[] = [];
+
+        if (status) {
+            query += ' WHERE status = $1';
+            values.push(status);
+        }
+
+        const result = await pool.query(query, values);
+        return parseInt(result.rows[0].count, 10);
+    },
+
     async getById(id: string) {
         const result = await pool.query(
             'SELECT * FROM surveys WHERE id = $1',
@@ -105,6 +118,26 @@ const surveys = {
 
     async delete(id: string) {
         await pool.query('DELETE FROM surveys WHERE id = $1', [id]);
+    },
+    async getDashboardStats() {
+        const query = `
+            SELECT 
+                s.id, 
+                s.title, 
+                s.status,
+                s.created_at as "createdAt", 
+                COUNT(r.id) as "responseCount",
+                MAX(r.completed_at) as "lastResponseAt"
+            FROM surveys s
+            LEFT JOIN responses r ON s.id = r.survey_id
+            GROUP BY s.id
+            ORDER BY "lastResponseAt" DESC NULLS LAST, s.created_at DESC
+        `;
+        const result = await pool.query(query);
+        return result.rows.map(row => ({
+            ...row,
+            responseCount: parseInt(row.responseCount, 10)
+        }));
     },
 };
 
@@ -345,6 +378,44 @@ const responses = {
             [surveyId]
         );
         return parseInt(result.rows[0].count, 10);
+    },
+
+    async countTotal(): Promise<number> {
+        const result = await pool.query('SELECT COUNT(*) as count FROM responses');
+        return parseInt(result.rows[0].count, 10);
+    },
+
+    async getDailyTrends(days: number) {
+        const result = await pool.query(
+            `SELECT 
+                to_char(completed_at, 'YYYY-MM-DD') as date, 
+                COUNT(*) as count 
+            FROM responses 
+            WHERE completed_at >= NOW() - ($1 || ' days')::interval
+            GROUP BY date
+            ORDER BY date ASC`,
+            [days]
+        );
+        return result.rows.map(row => ({
+            date: row.date,
+            count: parseInt(row.count, 10)
+        }));
+    },
+
+    async getRecentActivity(limit: number) {
+        const result = await pool.query(
+            `SELECT 
+                r.id, 
+                r.completed_at as "completedAt", 
+                s.title as "surveyTitle",
+                r.survey_id as "surveyId"
+            FROM responses r
+            JOIN surveys s ON r.survey_id = s.id
+            ORDER BY r.completed_at DESC
+            LIMIT $1`,
+            [limit]
+        );
+        return result.rows;
     },
 };
 

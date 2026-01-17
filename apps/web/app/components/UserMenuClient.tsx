@@ -23,9 +23,10 @@ export default function UserMenuClient({ user, logoutAction }: { user: User, log
 
   const isBuilder = pathname?.startsWith("/builder")
   const isSurveys = pathname?.startsWith("/surveys")
+  const isAnalytics = pathname?.startsWith("/analytics")
   const isSurveyRunner = pathname?.includes("/survey/")
   
-  if (isBuilder || isSurveys || isSurveyRunner) return null; 
+  if (isBuilder || isSurveys || isAnalytics || isSurveyRunner) return null; 
 
   const baseStyle: React.CSSProperties = {
     position: 'fixed',
