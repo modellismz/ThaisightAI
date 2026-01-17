@@ -7,6 +7,7 @@ import {
     ArrowLeft, Download, Loader2, Users, Clock, TrendingUp,
     BarChart2, PieChart, FileText, RefreshCw
 } from 'lucide-react';
+import { motion, Variants } from 'framer-motion';
 import styles from './analytics.module.css';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -23,6 +24,29 @@ interface AnalyticsData {
     config: any;
     responses: any[];
 }
+
+const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1
+        }
+    }
+};
+
+const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 100,
+            damping: 10
+        }
+    }
+};
 
 export default function AnalyticsPage() {
     const params = useParams();
@@ -103,7 +127,12 @@ export default function AnalyticsPage() {
     }
 
     return (
-        <div className={styles.container}>
+        <motion.div 
+            className={styles.container}
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+        >
             {/* Header */}
             <header className={styles.header}>
                 <div className={styles.headerLeft}>
@@ -111,8 +140,22 @@ export default function AnalyticsPage() {
                         <ArrowLeft size={18} />
                     </Link>
                     <div>
-                        <h1 className={styles.title}>Survey Analytics</h1>
-                        <p className={styles.subtitle}>Response data and insights</p>
+                        <motion.h1 
+                            className={styles.title}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            Survey Analytics
+                        </motion.h1>
+                        <motion.p 
+                            className={styles.subtitle}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.3 }}
+                        >
+                            Response data and insights
+                        </motion.p>
                     </div>
                 </div>
                 <div className={styles.headerActions}>
@@ -127,18 +170,28 @@ export default function AnalyticsPage() {
             </header>
 
             {/* Stats Cards */}
-            <section className={styles.statsGrid}>
-                <div className={styles.statCard}>
+            <motion.section 
+                className={styles.statsGrid}
+                variants={containerVariants}
+            >
+                <motion.div className={styles.statCard} variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
                     <div className={styles.statIcon}>
                         <Users size={24} />
                     </div>
                     <div className={styles.statContent}>
-                        <span className={styles.statValue}>{data?.totalResponses || 0}</span>
+                        <motion.span 
+                            className={styles.statValue}
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", delay: 0.2 }}
+                        >
+                            {data?.totalResponses || 0}
+                        </motion.span>
                         <span className={styles.statLabel}>Total Responses</span>
                     </div>
-                </div>
+                </motion.div>
 
-                <div className={styles.statCard}>
+                <motion.div className={styles.statCard} variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
                     <div className={styles.statIcon}>
                         <Clock size={24} />
                     </div>
@@ -148,9 +201,9 @@ export default function AnalyticsPage() {
                         </span>
                         <span className={styles.statLabel}>Avg. Duration</span>
                     </div>
-                </div>
+                </motion.div>
 
-                <div className={styles.statCard}>
+                <motion.div className={styles.statCard} variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
                     <div className={styles.statIcon}>
                         <TrendingUp size={24} />
                     </div>
@@ -160,9 +213,9 @@ export default function AnalyticsPage() {
                         </span>
                         <span className={styles.statLabel}>Questions Answered</span>
                     </div>
-                </div>
+                </motion.div>
 
-                <div className={styles.statCard}>
+                <motion.div className={styles.statCard} variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
                     <div className={styles.statIcon}>
                         <BarChart2 size={24} />
                     </div>
@@ -172,18 +225,29 @@ export default function AnalyticsPage() {
                         </span>
                         <span className={styles.statLabel}>Last 50 Responses</span>
                     </div>
-                </div>
-            </section>
+                </motion.div>
+            </motion.section>
 
             {/* Question Breakdown */}
             <section className={styles.section}>
-                <h2 className={styles.sectionTitle}>
+                <motion.h2 
+                    className={styles.sectionTitle}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                >
                     <PieChart size={20} />
                     Question Breakdown
-                </h2>
+                </motion.h2>
 
                 {data?.questionStats && Object.keys(data.questionStats).length > 0 ? (
-                    <div className={styles.questionGrid}>
+                    <motion.div 
+                        className={styles.questionGrid}
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                    >
                         {Object.entries(data.questionStats).map(([questionId, stats]) => (
                             <QuestionChart
                                 key={questionId}
@@ -194,7 +258,7 @@ export default function AnalyticsPage() {
                                 totalResponses={data.totalResponses}
                             />
                         ))}
-                    </div>
+                    </motion.div>
                 ) : (
                     <div className={styles.emptyState}>
                         <FileText size={48} className={styles.emptyIcon} />
@@ -207,12 +271,23 @@ export default function AnalyticsPage() {
             {/* Recent Responses Table */}
             {data?.responses && data.responses.length > 0 && (
                 <section className={styles.section}>
-                    <h2 className={styles.sectionTitle}>
+                    <motion.h2 
+                        className={styles.sectionTitle}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                    >
                         <FileText size={20} />
                         Recent Responses
-                    </h2>
+                    </motion.h2>
 
-                    <div className={styles.tableWrapper}>
+                    <motion.div 
+                        className={styles.tableWrapper}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                    >
                         <table className={styles.table}>
                             <thead>
                                 <tr>
@@ -223,20 +298,26 @@ export default function AnalyticsPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.responses.slice(0, 10).map((response: any) => (
-                                    <tr key={response.id}>
+                                {data.responses.slice(0, 10).map((response: any, i) => (
+                                    <motion.tr 
+                                        key={response.id}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        whileInView={{ opacity: 1, x: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: i * 0.05 }}
+                                    >
                                         <td className={styles.idCell}>{response.id?.slice(0, 8)}...</td>
                                         <td>{new Date(response.completed_at).toLocaleDateString()}</td>
                                         <td>{formatDuration(response.duration_seconds || 0)}</td>
                                         <td>{Object.keys(response.answers || {}).length} answers</td>
-                                    </tr>
+                                    </motion.tr>
                                 ))}
                             </tbody>
                         </table>
-                    </div>
+                    </motion.div>
                 </section>
             )}
-        </div>
+        </motion.div>
     );
 }
 
@@ -259,6 +340,16 @@ function QuestionChart({
         .sort((a, b) => (b[1] as number) - (a[1] as number))
         .slice(0, 8); // Top 8 answers
 
+    // Common variant for cards
+    const cardVariant: Variants = {
+        hidden: { opacity: 0, scale: 0.95 },
+        visible: { 
+            opacity: 1, 
+            scale: 1,
+            transition: { duration: 0.5 }
+        }
+    };
+
     // For NPS questions, calculate score
     if (questionType === 'nps') {
         const values = stats.values.filter((v: any) => typeof v === 'number');
@@ -269,12 +360,17 @@ function QuestionChart({
             : 0;
 
         return (
-            <div className={styles.questionCard}>
+            <motion.div className={styles.questionCard} variants={cardVariant}>
                 <h3 className={styles.questionTitle}>{questionText}</h3>
                 <div className={styles.npsDisplay}>
-                    <div className={`${styles.npsScore} ${npsScore >= 0 ? styles.npsPositive : styles.npsNegative}`}>
+                    <motion.div 
+                        className={`${styles.npsScore} ${npsScore >= 0 ? styles.npsPositive : styles.npsNegative}`}
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
+                    >
                         {npsScore > 0 ? '+' : ''}{npsScore}
-                    </div>
+                    </motion.div>
                     <span className={styles.npsLabel}>NPS Score</span>
                 </div>
                 <div className={styles.npsBreakdown}>
@@ -291,7 +387,7 @@ function QuestionChart({
                         <span>Detractors</span>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
@@ -303,40 +399,58 @@ function QuestionChart({
             : 0;
 
         return (
-            <div className={styles.questionCard}>
+            <motion.div className={styles.questionCard} variants={cardVariant}>
                 <h3 className={styles.questionTitle}>{questionText}</h3>
                 <div className={styles.avgDisplay}>
-                    <span className={styles.avgValue}>{avg}</span>
+                    <motion.span 
+                        className={styles.avgValue}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                    >
+                        {avg}
+                    </motion.span>
                     <span className={styles.avgLabel}>Average</span>
                 </div>
                 <div className={styles.responseCount}>{values.length} responses</div>
-            </div>
+            </motion.div>
         );
     }
 
     // For choice questions, show bar chart
     return (
-        <div className={styles.questionCard}>
+        <motion.div className={styles.questionCard} variants={cardVariant}>
             <h3 className={styles.questionTitle}>{questionText}</h3>
             <div className={styles.barChart}>
-                {sortedEntries.map(([answer, count]) => {
+                {sortedEntries.map(([answer, count], index) => {
+                    const numericCount = count as number;
                     const percentage = totalResponses > 0
-                        ? Math.round((count as number / totalResponses) * 100)
+                        ? Math.round((numericCount / totalResponses) * 100)
                         : 0;
                     return (
                         <div key={answer} className={styles.barRow}>
                             <div className={styles.barLabel}>{answer}</div>
                             <div className={styles.barContainer}>
-                                <div
+                                <motion.div
                                     className={styles.bar}
-                                    style={{ width: `${percentage}%` }}
+                                    initial={{ width: 0 }}
+                                    whileInView={{ width: `${percentage}%` }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
                                 />
-                                <span className={styles.barValue}>{count} ({percentage}%)</span>
+                                <motion.span 
+                                    className={styles.barValue}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.5 + (index * 0.1) }}
+                                >
+                                    {numericCount} ({percentage}%)
+                                </motion.span>
                             </div>
                         </div>
                     );
                 })}
             </div>
-        </div>
+        </motion.div>
     );
 }
