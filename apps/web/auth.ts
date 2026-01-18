@@ -8,23 +8,45 @@ const config = {
     async signIn({ user }) {
       if (!user.email) return false
 
-
       try {
         console.log(`[Auth] Checking access for email: ${user.email}`)
         const trpc = getServerTRPCClient()
-        console.log(`[Auth] Fetching user from DB...`)
         const dbUser = await trpc.user.getByEmail.query({ email: user.email })
         console.log(`[Auth] DB User found:`, dbUser)
 
-        if (dbUser && dbUser.role === 'admin') {
+        if (dbUser) {
           return true
         }
-        console.log(`[Auth] Access denied: User not found or not admin`)
+        console.log(`[Auth] Access denied: User not found in DB`)
+        return '/login?error=AccessDenied'
       } catch (error) {
         console.error("Auth Error:", error)
+        return '/login?error=SystemError'
       }
-
-      return '/login?error=AccessDenied' // Return URL to redirect to login page with error
+    },
+    async jwt({ token, user }) {
+      if (user && user.email) {
+        const trpc = getServerTRPCClient()
+        try {
+          const dbUser = await trpc.user.getByEmail.query({ email: user.email })
+          if (dbUser) {
+            token.id = dbUser.id
+            token.role = dbUser.role
+            token.orgId = dbUser.orgId
+          }
+        } catch (error) {
+          console.error("JWT Auth Fetch Error:", error)
+        }
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string
+        session.user.role = token.role as string | undefined
+        session.user.orgId = token.orgId as string | null | undefined
+      }
+      return session
     },
   },
   pages: {

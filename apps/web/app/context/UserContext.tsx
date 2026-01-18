@@ -4,9 +4,12 @@
 import { createContext, useContext, ReactNode } from 'react';
 
 interface User {
+  id?: string;
   name?: string | null;
   email?: string | null;
   image?: string | null;
+  role?: string;
+  orgId?: string | null;
 }
 
 const UserContext = createContext<User | undefined>(undefined);

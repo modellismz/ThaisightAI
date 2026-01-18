@@ -15,7 +15,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <TRPCProvider>
+        <TRPCProvider user={session?.user}>
           <UserProvider user={session?.user}>
             <UserMenu />
             {children}

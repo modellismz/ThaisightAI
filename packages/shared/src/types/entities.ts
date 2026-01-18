@@ -4,6 +4,7 @@
  */
 
 // ============================================
+// ============================================
 // Organization
 // ============================================
 
@@ -19,11 +20,11 @@ export interface Organization {
 // User
 // ============================================
 
-export type UserRole = 'owner' | 'admin' | 'member' | 'viewer';
+export type UserRole = 'admin' | 'owner' | 'member';
 
 export interface User {
     id: string;
-    orgId: string;
+    orgId?: string | null; // Admin might not have an org, or can view all. Owner/Member belongs to an org.
     email: string;
     name: string | null;
     role: UserRole;

@@ -32,10 +32,20 @@ const MOCK_SURVEYS = [
 async function main() {
     console.log('Starting seed surveys...');
 
+    // Get the first organization to assign surveys to
+    let org = (await db.organizations.list())[0];
+    if (!org) {
+        console.log('No organization found. Creating default organization...');
+        org = await db.organizations.create('Central Group', 'central-group');
+    }
+
+    const orgId = org.id;
+    console.log(`Using Organization ID: ${orgId}`);
+
     for (const surveyData of MOCK_SURVEYS) {
         console.log(`Creating survey: ${surveyData.title}`);
         try {
-            const survey = await db.surveys.create(surveyData);
+            const survey = await db.surveys.create({ ...surveyData, orgId });
             console.log(`✓ Created survey ID: ${survey.id}`);
 
             // Optional: Publish them or add initial content if needed in the future

@@ -470,3 +470,129 @@
 .userDropdownItem:hover {
     background: rgba(239, 68, 68, 0.1);
 }
+
+/* Tabs */
+.tabsContainer {
+    display: flex;
+    gap: var(--space-6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: var(--space-6);
+    padding: 0 var(--space-2);
+}
+
+.tabBtn {
+    position: relative;
+    padding: var(--space-3) var(--space-1);
+    background: transparent;
+    border: none;
+    color: var(--gray-400);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.tabBtn:hover {
+    color: white;
+}
+
+.activeTabBtn {
+    color: white;
+    font-weight: 600;
+}
+
+.activeIndicator {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--primary);
+    border-radius: var(--radius-full);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* Organization Card Grid */
+.orgGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-6);
+}
+
+.orgCard {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: var(--space-8);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease-out;
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+    contain: layout;
+}
+
+.orgCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.25s ease-out;
+    will-change: opacity;
+}
+
+.orgCard:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.3);
+    transform: translateY(-6px);
+}
+
+.orgCard:hover::before {
+    opacity: 1;
+}
+
+.orgCardIcon {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--space-5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+    border: 2px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--radius-xl);
+    color: #a5b4fc;
+    transition: all 0.25s ease-out;
+    will-change: transform;
+}
+
+.orgCard:hover .orgCardIcon {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.25) 100%);
+    border-color: rgba(99, 102, 241, 0.4);
+    color: #c7d2fe;
+    transform: scale(1.08);
+}
+
+.orgCardTitle {
+    position: relative;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 var(--space-3);
+    letter-spacing: -0.02em;
+}
+
+.orgCardCount {
+    position: relative;
+    font-size: 0.9375rem;
+    color: var(--gray-400);
+    margin: 0;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}

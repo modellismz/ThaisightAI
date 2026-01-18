@@ -9,7 +9,9 @@ import type {
     SurveyVersion,
     Session,
     ResponseEvent,
-    Response as SurveyResponse
+    Response as SurveyResponse,
+    Organization,
+    User
 } from '@repo/shared/types';
 import type { CreateSurvey, UpdateSurvey, SurveyConfig } from '@repo/shared/schemas';
 
@@ -26,34 +28,202 @@ const pool = new Pool({
 });
 
 // ============================================
+// Helpers
+// ============================================
+
+function mapSurveyRow(row: Record<string, unknown>): Survey {
+    return {
+        id: row.id as string,
+        orgId: row.org_id as string,
+        ownerId: row.owner_id as string | null,
+        title: row.title as string,
+        description: row.description as string | null,
+        status: row.status as Survey['status'],
+        defaultLanguage: row.default_language as string,
+        settings: (row.settings as Record<string, unknown>) || {},
+        createdAt: row.created_at as Date,
+        updatedAt: row.updated_at as Date,
+    };
+}
+
+function mapUserRow(row: Record<string, unknown>): User {
+    return {
+        id: row.id as string,
+        email: row.email as string,
+        role: row.role as User['role'],
+        orgId: row.org_id as string | null,
+        name: row.name as string | null,
+        createdAt: row.created_at as Date,
+        updatedAt: row.updated_at as Date,
+    };
+}
+
+// ============================================
+// ============================================
+// Organizations
+// ============================================
+
+const organizations = {
+    async create(name: string, slug: string) {
+        const result = await pool.query(
+            `INSERT INTO organizations (name, slug)
+             VALUES ($1, $2)
+             RETURNING *`,
+            [name, slug]
+        );
+        const row = result.rows[0];
+        return {
+            id: row.id,
+            name: row.name,
+            slug: row.slug,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at
+        } as Organization;
+    },
+
+    async getById(id: string) {
+        const result = await pool.query(
+            'SELECT * FROM organizations WHERE id = $1',
+            [id]
+        );
+        if (!result.rows[0]) return undefined;
+        const row = result.rows[0];
+        return {
+            id: row.id,
+            name: row.name,
+            slug: row.slug,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at
+        } as Organization;
+    },
+
+    async list() {
+        const result = await pool.query('SELECT * FROM organizations ORDER BY created_at DESC');
+        return result.rows.map(row => ({
+            id: row.id,
+            name: row.name,
+            slug: row.slug,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at
+        })) as Organization[];
+    },
+
+    async getMembers(orgId: string) {
+        const result = await pool.query(
+            'SELECT * FROM users WHERE org_id = $1 ORDER BY created_at DESC',
+            [orgId]
+        );
+        return result.rows.map(mapUserRow);
+    },
+
+    async removeMember(orgId: string, userId: string) {
+        // Only remove if they belong to this org
+        await pool.query(
+            'UPDATE users SET org_id = NULL, role = NULL WHERE id = $1 AND org_id = $2',
+            [userId, orgId]
+        );
+    },
+
+    async update(id: string, name: string, slug: string) {
+        await pool.query(
+            'UPDATE organizations SET name = $1, slug = $2, updated_at = NOW() WHERE id = $3',
+            [name, slug, id]
+        );
+    },
+
+    async delete(id: string) {
+        // Optional: Manual cleanup if cascades aren't set up.
+        // For now, attempting direct delete.
+        await pool.query('DELETE FROM organizations WHERE id = $1', [id]);
+    }
+};
+
+// ============================================
 // Surveys
 // ============================================
 
 const surveys = {
-    async list(params: { limit: number; offset: number; status?: string }) {
-        const { limit, offset, status } = params;
+    async list(params: { limit: number; offset: number; status?: string; orgId?: string }) {
+        const { limit, offset, status, orgId } = params;
         let query = 'SELECT * FROM surveys';
         const values: unknown[] = [];
+        let whereClauses: string[] = [];
+        let paramIndex = 1;
 
         if (status) {
-            query += ' WHERE status = $1';
+            whereClauses.push(`status = $${paramIndex++}`);
             values.push(status);
         }
 
-        query += ` ORDER BY created_at DESC LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+        if (orgId) {
+            whereClauses.push(`org_id = $${paramIndex++}`);
+            values.push(orgId);
+        }
+
+        if (whereClauses.length > 0) {
+            query += ' WHERE ' + whereClauses.join(' AND ');
+        }
+
+        query += ` ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
         values.push(limit, offset);
 
         const result = await pool.query(query, values);
-        return result.rows as Survey[];
+        return result.rows.map(mapSurveyRow);
     },
 
-    async countTotal(status?: string): Promise<number> {
-        let query = 'SELECT COUNT(*) as count FROM surveys';
+    async listWithOrgs(params: { limit: number; offset: number; status?: string; orgId?: string }) {
+        const { limit, offset, status, orgId } = params;
+        let query = `
+            SELECT s.*, o.name as org_name
+            FROM surveys s
+            LEFT JOIN organizations o ON s.org_id = o.id
+        `;
         const values: unknown[] = [];
+        let whereClauses: string[] = [];
+        let paramIndex = 1;
 
         if (status) {
-            query += ' WHERE status = $1';
+            whereClauses.push(`s.status = $${paramIndex++}`);
             values.push(status);
+        }
+
+        if (orgId) {
+            whereClauses.push(`s.org_id = $${paramIndex++}`);
+            values.push(orgId);
+        }
+
+        if (whereClauses.length > 0) {
+            query += ' WHERE ' + whereClauses.join(' AND ');
+        }
+
+        query += ` ORDER BY s.created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+        values.push(limit, offset);
+
+        const result = await pool.query(query, values);
+        return result.rows.map(row => ({
+            ...mapSurveyRow(row),
+            orgName: row.org_name as string
+        }));
+    },
+
+    async countTotal(status?: string, orgId?: string): Promise<number> {
+        let query = 'SELECT COUNT(*) as count FROM surveys';
+        const values: unknown[] = [];
+        let whereClauses: string[] = [];
+        let paramIndex = 1;
+
+        if (status) {
+            whereClauses.push(`status = $${paramIndex++}`);
+            values.push(status);
+        }
+
+        if (orgId) {
+            whereClauses.push(`org_id = $${paramIndex++}`);
+            values.push(orgId);
+        }
+
+        if (whereClauses.length > 0) {
+            query += ' WHERE ' + whereClauses.join(' AND ');
         }
 
         const result = await pool.query(query, values);
@@ -65,18 +235,18 @@ const surveys = {
             'SELECT * FROM surveys WHERE id = $1',
             [id]
         );
-        return result.rows[0] as Survey | undefined;
+        return result.rows[0] ? mapSurveyRow(result.rows[0]) : undefined;
     },
 
-    async create(data: CreateSurvey) {
+    async create(data: CreateSurvey & { orgId: string }) {
         const result = await pool.query(
-            `INSERT INTO surveys (title, description, default_language, status)
-       VALUES ($1, $2, $3, 'draft')
+            `INSERT INTO surveys (title, description, default_language, status, org_id)
+       VALUES ($1, $2, $3, 'draft', $4)
        RETURNING *`,
-            [data.title, data.description || null, data.defaultLanguage || 'en']
+            [data.title, data.description || null, data.defaultLanguage || 'en', data.orgId]
         );
 
-        const survey = result.rows[0] as Survey;
+        const survey = mapSurveyRow(result.rows[0]);
 
         // Create initial empty draft
         await pool.query(
@@ -113,14 +283,14 @@ const surveys = {
             `UPDATE surveys SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
             values
         );
-        return result.rows[0] as Survey;
+        return result.rows[0] ? mapSurveyRow(result.rows[0]) : undefined;
     },
 
     async delete(id: string) {
         await pool.query('DELETE FROM surveys WHERE id = $1', [id]);
     },
-    async getDashboardStats() {
-        const query = `
+    async getDashboardStats(orgId?: string) {
+        let query = `
             SELECT 
                 s.id, 
                 s.title, 
@@ -130,10 +300,20 @@ const surveys = {
                 MAX(r.completed_at) as "lastResponseAt"
             FROM surveys s
             LEFT JOIN responses r ON s.id = r.survey_id
+        `;
+        const values: unknown[] = [];
+
+        if (orgId) {
+            query += ` WHERE s.org_id = $1`;
+            values.push(orgId);
+        }
+
+        query += `
             GROUP BY s.id
             ORDER BY "lastResponseAt" DESC NULLS LAST, s.created_at DESC
         `;
-        const result = await pool.query(query);
+
+        const result = await pool.query(query, values);
         return result.rows.map(row => ({
             ...row,
             responseCount: parseInt(row.responseCount, 10)
@@ -380,41 +560,71 @@ const responses = {
         return parseInt(result.rows[0].count, 10);
     },
 
-    async countTotal(): Promise<number> {
-        const result = await pool.query('SELECT COUNT(*) as count FROM responses');
+    async countTotal(orgId?: string): Promise<number> {
+        let query = 'SELECT COUNT(r.id) as count FROM responses r';
+        const values: unknown[] = [];
+
+        if (orgId) {
+            query += ' JOIN surveys s ON r.survey_id = s.id WHERE s.org_id = $1';
+            values.push(orgId);
+        }
+
+        const result = await pool.query(query, values);
         return parseInt(result.rows[0].count, 10);
     },
 
-    async getDailyTrends(days: number) {
-        const result = await pool.query(
-            `SELECT 
-                to_char(completed_at, 'YYYY-MM-DD') as date, 
-                COUNT(*) as count 
-            FROM responses 
-            WHERE completed_at >= NOW() - ($1 || ' days')::interval
+    async getDailyTrends(days: number, orgId?: string) {
+        let query = `
+            SELECT 
+                to_char(r.completed_at, 'YYYY-MM-DD') as date, 
+                COUNT(r.id) as count 
+            FROM responses r
+        `;
+        const values: unknown[] = [days];
+        let paramIndex = 2;
+
+        if (orgId) {
+            query += ` JOIN surveys s ON r.survey_id = s.id WHERE s.org_id = $${paramIndex} AND `;
+            values.push(orgId);
+        } else {
+            query += ` WHERE `;
+        }
+
+        query += `r.completed_at >= NOW() - ($1 || ' days')::interval
             GROUP BY date
-            ORDER BY date ASC`,
-            [days]
-        );
+            ORDER BY date ASC`;
+
+        const result = await pool.query(query, values);
         return result.rows.map(row => ({
             date: row.date,
             count: parseInt(row.count, 10)
         }));
     },
 
-    async getRecentActivity(limit: number) {
-        const result = await pool.query(
-            `SELECT 
+    async getRecentActivity(limit: number, orgId?: string) {
+        let query = `
+            SELECT 
                 r.id, 
                 r.completed_at as "completedAt", 
                 s.title as "surveyTitle",
                 r.survey_id as "surveyId"
             FROM responses r
             JOIN surveys s ON r.survey_id = s.id
+        `;
+        const values: unknown[] = [limit];
+        let paramIndex = 2;
+
+        if (orgId) {
+            query += ` WHERE s.org_id = $${paramIndex}`;
+            values.push(orgId);
+        }
+
+        query += `
             ORDER BY r.completed_at DESC
-            LIMIT $1`,
-            [limit]
-        );
+            LIMIT $1
+        `;
+
+        const result = await pool.query(query, values);
         return result.rows;
     },
 };
@@ -429,13 +639,28 @@ const users = {
             'SELECT * FROM users WHERE email = $1',
             [email]
         );
-        return result.rows[0] as { id: string; email: string; role: string } | undefined;
+        return result.rows[0] ? mapUserRow(result.rows[0]) : undefined;
+    },
+
+    async create(data: { email: string; role: string; orgId?: string; name?: string }) {
+        const result = await pool.query(
+            `INSERT INTO users (email, role, org_id, name)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (email) DO UPDATE SET 
+                role = EXCLUDED.role,
+                org_id = EXCLUDED.org_id,
+                name = EXCLUDED.name
+             RETURNING *`,
+            [data.email, data.role, data.orgId || null, data.name || null]
+        );
+        return mapUserRow(result.rows[0]);
     },
 };
 
 // Export database interface
 export const db = {
     pool,
+    organizations,
     users,
     surveys,
     surveyDrafts,

@@ -49,7 +49,7 @@ interface BuilderState {
     reset: () => void;
 }
 
-const initialConfig: SurveyConfig = {
+export const initialConfig: SurveyConfig = {
     version: '1.0',
     blocks: [],
     settings: {

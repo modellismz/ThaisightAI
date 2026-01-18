@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useBuilderStore } from '../../stores/builder.store';
+import { useBuilderStore, initialConfig } from '../../stores/builder.store';
 import { useAutosave, loadDraftFromLocalStorage } from '../../hooks/useAutosave';
 import { SurveyBuilder } from '../_components/SurveyBuilder';
 
@@ -44,7 +44,16 @@ export default function SurveyBuilderPage() {
     const handleRestoreDraft = () => {
         const draft = loadDraftFromLocalStorage();
         if (draft?.config) {
-            setConfig(draft.config);
+            // Merge loading config with defaults to ensure all fields exist
+            const mergedConfig = {
+                ...initialConfig,
+                ...draft.config,
+                settings: {
+                    ...initialConfig.settings,
+                    ...(draft.config.settings || {})
+                }
+            };
+            setConfig(mergedConfig);
             if (draft.surveyTitle) {
                 setSurveyTitle(draft.surveyTitle);
             }

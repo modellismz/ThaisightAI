@@ -3,7 +3,8 @@
  * CRUD operations for surveys
  */
 import { z } from 'zod';
-import { router, publicProcedure } from '../trpc';
+import { router, protectedProcedure } from '../trpc';
+import { TRPCError } from '@trpc/server';
 import {
     CreateSurveySchema,
     UpdateSurveySchema,
@@ -15,26 +16,33 @@ export const surveyRouter = router({
     /**
      * List all surveys for the current organization
      */
-    list: publicProcedure
+    list: protectedProcedure
         .input(z.object({
             limit: z.number().min(1).max(100).default(20),
             offset: z.number().min(0).default(0),
             status: z.enum(['draft', 'published', 'closed']).optional(),
         }))
-        .query(async ({ input }) => {
-            const surveys = await db.surveys.list(input);
-            return surveys;
+        .query(async ({ input, ctx }) => {
+            if (ctx.user.role === 'admin') {
+                return await db.surveys.listWithOrgs(input);
+            }
+
+            if (!ctx.user.orgId) return []; // User has no org, sees nothing
+            return await db.surveys.list({ ...input, orgId: ctx.user.orgId });
         }),
 
     /**
      * Get a single survey by ID
      */
-    getById: publicProcedure
+    getById: protectedProcedure
         .input(z.object({ id: z.string().uuid() }))
-        .query(async ({ input }) => {
+        .query(async ({ input, ctx }) => {
             const survey = await db.surveys.getById(input.id);
             if (!survey) {
-                throw new Error('Survey not found');
+                throw new TRPCError({ code: 'NOT_FOUND', message: 'Survey not found' });
+            }
+            if (ctx.user.role !== 'admin' && survey.orgId !== ctx.user.orgId) {
+                throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
             }
             return survey;
         }),
@@ -42,22 +50,32 @@ export const surveyRouter = router({
     /**
      * Create a new survey
      */
-    create: publicProcedure
+    create: protectedProcedure
         .input(CreateSurveySchema)
-        .mutation(async ({ input }) => {
-            const survey = await db.surveys.create(input);
+        .mutation(async ({ input, ctx }) => {
+            if (!ctx.user.orgId) {
+                throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'User must belong to an organization to create surveys' });
+            }
+            const survey = await db.surveys.create({ ...input, orgId: ctx.user.orgId });
             return survey;
         }),
 
     /**
      * Update survey metadata
      */
-    update: publicProcedure
+    update: protectedProcedure
         .input(z.object({
             id: z.string().uuid(),
             data: UpdateSurveySchema,
         }))
-        .mutation(async ({ input }) => {
+        .mutation(async ({ input, ctx }) => {
+            const existing = await db.surveys.getById(input.id);
+            if (!existing) throw new TRPCError({ code: 'NOT_FOUND' });
+
+            if (ctx.user.role !== 'admin' && existing.orgId !== ctx.user.orgId) {
+                throw new TRPCError({ code: 'FORBIDDEN' });
+            }
+
             const survey = await db.surveys.update(input.id, input.data);
             return survey;
         }),
@@ -65,9 +83,16 @@ export const surveyRouter = router({
     /**
      * Delete a survey
      */
-    delete: publicProcedure
+    delete: protectedProcedure
         .input(z.object({ id: z.string().uuid() }))
-        .mutation(async ({ input }) => {
+        .mutation(async ({ input, ctx }) => {
+            const existing = await db.surveys.getById(input.id);
+            if (!existing) throw new TRPCError({ code: 'NOT_FOUND' });
+
+            if (ctx.user.role !== 'admin' && existing.orgId !== ctx.user.orgId) {
+                throw new TRPCError({ code: 'FORBIDDEN' });
+            }
+
             await db.surveys.delete(input.id);
             return { success: true };
         }),
@@ -75,9 +100,15 @@ export const surveyRouter = router({
     /**
      * Get the current draft config
      */
-    getDraft: publicProcedure
+    getDraft: protectedProcedure
         .input(z.object({ surveyId: z.string().uuid() }))
-        .query(async ({ input }) => {
+        .query(async ({ input, ctx }) => {
+            const survey = await db.surveys.getById(input.surveyId);
+            if (!survey) throw new TRPCError({ code: 'NOT_FOUND' });
+            if (ctx.user.role !== 'admin' && survey.orgId !== ctx.user.orgId) {
+                throw new TRPCError({ code: 'FORBIDDEN' });
+            }
+
             const draft = await db.surveyDrafts.getBySurveyId(input.surveyId);
             return draft;
         }),
@@ -85,12 +116,18 @@ export const surveyRouter = router({
     /**
      * Update the draft config
      */
-    updateDraft: publicProcedure
+    updateDraft: protectedProcedure
         .input(z.object({
             surveyId: z.string().uuid(),
             config: SurveyConfigSchema,
         }))
-        .mutation(async ({ input }) => {
+        .mutation(async ({ input, ctx }) => {
+            const survey = await db.surveys.getById(input.surveyId);
+            if (!survey) throw new TRPCError({ code: 'NOT_FOUND' });
+            if (ctx.user.role !== 'admin' && survey.orgId !== ctx.user.orgId) {
+                throw new TRPCError({ code: 'FORBIDDEN' });
+            }
+
             const draft = await db.surveyDrafts.upsert(input.surveyId, input.config);
             return draft;
         }),
@@ -98,19 +135,25 @@ export const surveyRouter = router({
     /**
      * Publish the current draft as a new version
      */
-    publish: publicProcedure
+    publish: protectedProcedure
         .input(z.object({ surveyId: z.string().uuid() }))
-        .mutation(async ({ input }) => {
+        .mutation(async ({ input, ctx }) => {
+            const survey = await db.surveys.getById(input.surveyId);
+            if (!survey) throw new TRPCError({ code: 'NOT_FOUND' });
+            if (ctx.user.role !== 'admin' && survey.orgId !== ctx.user.orgId) {
+                throw new TRPCError({ code: 'FORBIDDEN' });
+            }
+
             // 1. Get the current draft
             const draft = await db.surveyDrafts.getBySurveyId(input.surveyId);
             if (!draft) {
-                throw new Error('No draft found to publish');
+                throw new TRPCError({ code: 'NOT_FOUND', message: 'No draft found to publish' });
             }
 
             // 2. Validate the config
             const parseResult = SurveyConfigSchema.safeParse(draft.config);
             if (!parseResult.success) {
-                throw new Error(`Invalid survey config: ${parseResult.error.message}`);
+                throw new TRPCError({ code: 'BAD_REQUEST', message: `Invalid survey config: ${parseResult.error.message}` });
             }
 
             // 3. Get the next version number
@@ -133,9 +176,15 @@ export const surveyRouter = router({
     /**
      * Get all published versions of a survey
      */
-    listVersions: publicProcedure
+    listVersions: protectedProcedure
         .input(z.object({ surveyId: z.string().uuid() }))
-        .query(async ({ input }) => {
+        .query(async ({ input, ctx }) => {
+            const survey = await db.surveys.getById(input.surveyId);
+            if (!survey) throw new TRPCError({ code: 'NOT_FOUND' });
+            if (ctx.user.role !== 'admin' && survey.orgId !== ctx.user.orgId) {
+                throw new TRPCError({ code: 'FORBIDDEN' });
+            }
+
             const versions = await db.surveyVersions.listBySurveyId(input.surveyId);
             return versions;
         }),
@@ -143,15 +192,21 @@ export const surveyRouter = router({
     /**
      * Get a specific published version
      */
-    getVersion: publicProcedure
+    getVersion: protectedProcedure
         .input(z.object({
             surveyId: z.string().uuid(),
             versionId: z.string().uuid(),
         }))
-        .query(async ({ input }) => {
+        .query(async ({ input, ctx }) => {
+            const survey = await db.surveys.getById(input.surveyId);
+            if (!survey) throw new TRPCError({ code: 'NOT_FOUND' });
+            if (ctx.user.role !== 'admin' && survey.orgId !== ctx.user.orgId) {
+                throw new TRPCError({ code: 'FORBIDDEN' });
+            }
+
             const version = await db.surveyVersions.getById(input.versionId);
             if (!version || version.surveyId !== input.surveyId) {
-                throw new Error('Version not found');
+                throw new TRPCError({ code: 'NOT_FOUND', message: 'Version not found' });
             }
             return version;
         }),

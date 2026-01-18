@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useUser } from '../context/UserContext';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
-import { LogOut } from 'lucide-react';
+import Link from 'next/link';
+import { LogOut, Settings, Building2 } from 'lucide-react';
 import styles from './UserProfileDropdown.module.css';
 
 export function UserProfileDropdown() {
@@ -48,8 +49,25 @@ export function UserProfileDropdown() {
                     <div className={styles.userInfo}>
                         <span className={styles.userName}>{user.name}</span>
                         <span className={styles.userEmail}>{user.email}</span>
+                        {user.role && <span className={styles.userRoleBadge}>{user.role}</span>}
                     </div>
                     <hr className={styles.dropdownDivider} />
+                    
+                    {user.role === 'admin' && (
+                         <Link href="/admin/organizations" className={styles.userDropdownItem}>
+                            <Building2 size={14} />
+                            Manage Organizations
+                        </Link>
+                    )}
+
+                    {user.role === 'owner' && (
+                        <Link href="/settings/organization" className={styles.userDropdownItem}>
+                            <Settings size={14} />
+                            Organization Settings
+                        </Link>
+                    )}
+
+                    {(user.role === 'admin' || user.role === 'owner') &&  <hr className={styles.dropdownDivider} />}
                     <button 
                         className={styles.userDropdownItem}
                         onClick={() => signOut({ callbackUrl: '/login' })}
