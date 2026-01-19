@@ -54,10 +54,15 @@ app.get('/api/surveys', async (req, res) => {
 // Create survey
 app.post('/api/surveys', async (req, res) => {
     try {
-        const { title, description } = req.body;
+        const { title, description, orgId } = req.body;
 
         if (!title) {
             res.status(400).json({ error: 'Title is required' });
+            return;
+        }
+
+        if (!orgId) {
+            res.status(400).json({ error: 'Organization ID is required' });
             return;
         }
 
@@ -65,6 +70,7 @@ app.post('/api/surveys', async (req, res) => {
             title,
             description,
             defaultLanguage: 'en',
+            orgId,
         });
         res.status(201).json(survey);
     } catch (error) {
