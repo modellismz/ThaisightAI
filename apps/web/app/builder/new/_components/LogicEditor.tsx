@@ -73,7 +73,7 @@ export function LogicEditor({ question, blockId }: LogicEditorProps) {
     const addCondition = () => {
         if (availableQuestions.length === 0) return;
         const newCondition: LogicCondition = {
-            questionId: availableQuestions[0].id,
+            questionId: availableQuestions[0]!.id,
             operator: 'equals',
             value: '',
         };
@@ -85,7 +85,7 @@ export function LogicEditor({ question, blockId }: LogicEditorProps) {
 
     const updateCondition = (index: number, updates: Partial<LogicCondition>) => {
         const newConditions = [...displayLogic.conditions];
-        newConditions[index] = { ...newConditions[index], ...updates };
+        newConditions[index] = { ...newConditions[index], ...updates } as LogicCondition;
         updateLogic({ ...displayLogic, conditions: newConditions });
     };
 
@@ -196,7 +196,7 @@ export function LogicEditor({ question, blockId }: LogicEditorProps) {
                                                     questionType={getQuestionType(condition.questionId)}
                                                     choices={getQuestionChoices(condition.questionId)}
                                                     value={condition.value}
-                                                    onChange={(value) => updateCondition(index, { value })}
+                                                    onChange={(value) => updateCondition(index, { value: value as any })}
                                                 />
                                             )}
 
