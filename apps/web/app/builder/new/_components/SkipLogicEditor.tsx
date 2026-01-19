@@ -89,14 +89,14 @@ export function SkipLogicEditor({ question, blockId }: SkipLogicEditorProps) {
 
     const updateLogic = (newLogic: SkipLogic) => {
         updateQuestion(blockId, question.id, {
-            skipLogic: newLogic.conditions.length > 0 ? newLogic : undefined,
+            skipLogic: newLogic.conditions.length > 0 ? (newLogic as any) : undefined,
         });
     };
 
     const addCondition = () => {
         if (availableQuestions.length === 0) return;
         const newCondition: SkipCondition = {
-            questionId: availableQuestions[availableQuestions.length - 1].id, // Current question by default
+            questionId: availableQuestions[availableQuestions.length - 1]!.id, // Current question by default
             operator: 'equals',
             value: '',
         };
@@ -108,7 +108,7 @@ export function SkipLogicEditor({ question, blockId }: SkipLogicEditorProps) {
 
     const updateCondition = (index: number, updates: Partial<SkipCondition>) => {
         const newConditions = [...skipLogic.conditions];
-        newConditions[index] = { ...newConditions[index], ...updates };
+        newConditions[index] = { ...newConditions[index], ...updates } as SkipCondition;
         updateLogic({ ...skipLogic, conditions: newConditions });
     };
 
@@ -216,7 +216,7 @@ export function SkipLogicEditor({ question, blockId }: SkipLogicEditorProps) {
                                                     questionType={getQuestionType(condition.questionId)}
                                                     choices={getQuestionChoices(condition.questionId)}
                                                     value={condition.value}
-                                                    onChange={(value) => updateCondition(index, { value })}
+                                                    onChange={(value) => updateCondition(index, { value: value as any })}
                                                 />
                                             )}
 
