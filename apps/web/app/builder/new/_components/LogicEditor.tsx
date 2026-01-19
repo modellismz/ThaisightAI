@@ -8,7 +8,7 @@ import styles from './LogicEditor.module.css';
 interface LogicCondition {
     questionId: string;
     operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'is_empty' | 'is_not_empty';
-    value?: unknown;
+    value?: string | number | string[];
 }
 
 interface DisplayLogic {
