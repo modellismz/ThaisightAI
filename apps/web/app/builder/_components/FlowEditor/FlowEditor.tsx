@@ -25,8 +25,8 @@ const nodeTypes = {
 
 export function FlowEditor() {
     const { config, updateBlock, selectBlock } = useBuilderStore();
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
     // Transform blocks to nodes
     useEffect(() => {
