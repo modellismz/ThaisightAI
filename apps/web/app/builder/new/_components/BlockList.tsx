@@ -59,7 +59,7 @@ export function BlockList() {
                             isSelected={selectedBlockId === block.id}
                             onSelect={() => selectBlock(block.id)}
                             onDelete={() => deleteBlock(block.id)}
-                            onAddQuestion={(type) => addQuestion(block.id, type)}
+                            onAddQuestion={(type) => addQuestion(block.id, type as any)}
                             onReorderQuestions={(oldIndex, newIndex) => reorderQuestions(block.id, oldIndex, newIndex)}
                         />
                     ))}
